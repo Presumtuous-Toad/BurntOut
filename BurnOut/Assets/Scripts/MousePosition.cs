@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -6,10 +7,11 @@ public class MousePosition : MonoBehaviour
     [SerializeField] private Camera cam;
     [SerializeField] private LayerMask layerMask;
     [SerializeField] private Transform player;
-    [SerializeField] private float maxDistance;
+    [SerializeField] private float maxDistance = 3.0f;
+    [SerializeField] private float smoothTime = 0.3f;
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         MouseFollow();
     }
@@ -35,7 +37,8 @@ public class MousePosition : MonoBehaviour
                 player.position.z - maxDistance,
                 player.position.z + maxDistance);
 
-            this.transform.position = mousePosition;
+            // smoothly move object toward mouse 
+            gameObject.transform.position = Vector3.Lerp(gameObject.transform.position, mousePosition, Time.fixedDeltaTime/smoothTime);
         }
     }
 }
