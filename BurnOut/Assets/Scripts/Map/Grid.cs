@@ -82,7 +82,19 @@ public class Grid : MonoBehaviour
         return grid[x,y]; 
     }
 
-    public List<Node> path;     // Temporary
+    public void ResetGridNodes()
+    {
+        if(grid == null) return;
+
+        foreach(Node node in grid)
+        {
+            node.gCost = int.MaxValue;
+            node.hCost = 0;
+            node.parent = null;
+        }
+    }
+
+    public List<Node> path;     // Temporary - for testing reasons
     void OnDrawGizmos()
     {
         Gizmos.DrawWireCube(transform.position, new Vector3(gridWorldSize.x, 1, gridWorldSize.y));

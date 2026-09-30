@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Fire is a static enemy type that spreads itself
+/// Fire is a static enemy type that spreads itself. It deals damage to player as well.
 /// </summary>
 public class Fire : Enemy
 {
