@@ -28,14 +28,18 @@ public class PlayerController : MonoBehaviour
         float deltaTime = Time.fixedDeltaTime;
         Vector3 position = gameObject.transform.position;
 
+        if(direction == Vector3.zero)
+        {
+            return;
+        }
         velocity = direction.normalized * speed;
-        
+
         // remove once movement decided
-        if(swapMovement)
+        if (swapMovement)
         {
             // option 3 
             position.x += velocity.y * deltaTime;
-            position.z += velocity.x * deltaTime;
+            position.z += velocity.x * deltaTime * -1;
         }
         else
         {
