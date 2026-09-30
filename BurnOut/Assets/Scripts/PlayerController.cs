@@ -8,6 +8,7 @@ public class PlayerController : MonoBehaviour
     private Rigidbody rb;
     private Vector3 direction;
     private Vector2 velocity;
+    [SerializeField] private bool swapMovement = false;     // remove once control scheme chosen
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -28,8 +29,19 @@ public class PlayerController : MonoBehaviour
         Vector3 position = gameObject.transform.position;
 
         velocity = direction.normalized * speed;
-        position.x += velocity.x * deltaTime;
-        position.z += velocity.y * deltaTime;
+        
+        // remove once movement decided
+        if(swapMovement)
+        {
+            // option 3 
+            position.x += velocity.y * deltaTime;
+            position.z += velocity.x * deltaTime;
+        }
+        else
+        {
+            position.x += velocity.x * deltaTime;
+            position.z += velocity.y * deltaTime;
+        }
         rb.MovePosition(position);
     }
 
