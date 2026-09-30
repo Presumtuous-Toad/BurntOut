@@ -6,7 +6,12 @@ using UnityEngine;
 /// </summary>
 public class FireMonster : Enemy, IMoveable
 {
-
+    public enum MonsterBehavior
+    {
+        Patrol,     // Not Implemented
+        Chase,      // Need to optimize A* for enemy
+        Attack      // Not implemented
+    }
         
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
