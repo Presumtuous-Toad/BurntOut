@@ -727,8 +727,8 @@ Transform:
   m_GameObject: {fileID: 886571815}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.9999433, z: -0, w: -0.01064725}
-  m_LocalPosition: {x: -17.1, y: 9.1, z: 77}
-  m_LocalScale: {x: 28.592113, y: 20.58171, z: 58.279167}
+  m_LocalPosition: {x: -118.6, y: 2.04, z: 80.1}
+  m_LocalScale: {x: 6.4297466, y: 4.628381, z: 13.1057205}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 636210221}
@@ -1279,7 +1279,7 @@ Transform:
   m_GameObject: {fileID: 1901492056}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 183.3, y: 0.49, z: -4.4}
+  m_LocalPosition: {x: -95, y: 0.49, z: 63.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1302,9 +1302,9 @@ MonoBehaviour:
   player: {fileID: 91961127}
   moveSpeed: 3
   pathUpdateInterval: 0.2
-  wayPointThreshold: 0.2
+  waypointThreshold: 0.2
   viewRadius: 12
-  viewAngle: 90
+  viewAngle: 360
   obstacleMask:
     serializedVersion: 2
     m_Bits: 64

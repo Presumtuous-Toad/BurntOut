@@ -10,8 +10,8 @@ public class FireMonster : Enemy
 {
     public Transform player;
     public float moveSpeed = 3.0f;
-    public float pathUpdateInterval = 0.2f; // Calculating new path happens 5 times per second when chasing player.
-    public float wayPointThreshold = 0.2f;
+    public float pathUpdateInterval = 1.0f; // Calculating new path happens 5 times per second when chasing player.
+    public float waypointThreshold = 0.2f;
 
     private float timer;
 
@@ -22,7 +22,7 @@ public class FireMonster : Enemy
     
     private PathFinding pathFinding;
     private List<Vector3> currentPath = new List<Vector3>();    // Current path from enemy to player (Only active when player spotted)
-    private int currentWayPointIndex = 0;
+    private int currentWaypointIndex = 0;
     private bool hasSpottedPlayer = false;
 
     public enum MonsterBehavior
@@ -37,6 +37,11 @@ public class FireMonster : Enemy
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        foreach (Transform child in transform)
+        {
+            child.localRotation = Quaternion.identity;
+        }
+
         pathFinding = FindFirstObjectByType<PathFinding>(); 
     
         if (pathFinding == null)
@@ -69,90 +74,100 @@ public class FireMonster : Enemy
 
     void UpdatePath()
     {
-        if(player == null || pathFinding == null || pathFinding.grid == null) return;
+        if (player == null || pathFinding == null) return;
 
-        // Only request path finding when player is in line of sight
-        if(CanSeePlayer()) {
-            Debug.Log("Player in sight!");
+        if (CanSeePlayer())
+        {
             hasSpottedPlayer = true;
 
-            // Compute path to player
-            List<Node> rawPath = pathFinding.FindPath(position, player.position);
+            List<Node> rawPath = pathFinding.FindPath(transform.position, player.position);
 
-            if(rawPath != null && rawPath.Count > 0)
+            if (rawPath != null && rawPath.Count > 1)
             {
-                Debug.Log($"Path found! Nodes in path: {rawPath.Count}");
                 currentPath.Clear();
-                foreach(Node node in rawPath)
+
+                // Skip node 0 (the node we are currently standing on)
+                for (int i = 1; i < rawPath.Count; i++)
                 {
-                    currentPath.Add(node.worldPosition);
+                    currentPath.Add(rawPath[i].worldPosition);
                 }
-                currentWayPointIndex = 0;
+
+                currentWaypointIndex = 0;
             }
         }
         else
         {
-            // Player is not in sight - clear existing path and switch to patrolling LATER (logic change might be needed)
-            hasSpottedPlayer = false;
-            currentPath.Clear();
-            Debug.Log("Player not in sight.");
+            // Line-of-sight broken, but let monster will smoothly finish walking to the player's last known position.
+            hasSpottedPlayer = false; 
         }
     }
 
     public bool CanSeePlayer()
     {
-        if (player == null) return false;
+        if (player == null) 
+        {
+            Debug.LogWarning("[FOV Diagnostic] Player reference is NULL!");
+            return false;
+        }
 
-        Vector3 origin = transform.position + Vector3.forward * 1.0f;
-        Vector3 target = player.position + Vector3.forward * 1.0f;
+        Vector3 origin = transform.position + Vector3.up * 1.0f;
+        Vector3 target = player.position + Vector3.up * 1.0f;
 
         Vector3 dirToPlayer = (target - origin).normalized;
         float distToPlayer = Vector3.Distance(origin, target);
 
-        if (distToPlayer <= viewRadius)
+        // Distance Check
+        if (distToPlayer > viewRadius)
         {
-            float angle = Vector3.Angle(transform.forward, dirToPlayer);
-            
-            if (angle < viewAngle / 2f)
-            {
-                bool hitObstacle = Physics.Raycast(origin, dirToPlayer, distToPlayer - 0.1f, obstacleMask);
-                
-                // Visual Debug in Scene View
-                Debug.DrawLine(origin, target, hitObstacle ? Color.red : Color.green, 0.1f);
-
-                if (!hitObstacle)
-                {
-                    return true;
-                }
-            }
+            Debug.Log($"FAIL - Distance too far - Dist: {distToPlayer:F1} / Max: {viewRadius}");
+            return false;
         }
 
-        return false;
+        // Angle Check
+        float angle = Vector3.Angle(transform.forward, dirToPlayer);
+        if (angle > viewAngle / 2f)
+        {
+            Debug.Log($"FAIL - Outside cone! Angle: {angle:F1}° / Max allowed: {viewAngle / 2f}°");
+            return false;
+        }
+
+        // Raycast Obstacle Check
+        if (Physics.Raycast(origin, dirToPlayer, out RaycastHit hit, distToPlayer - 0.1f, obstacleMask))
+        {
+            Debug.Log($"FAIL - Raycast hit obstacle: '{hit.collider.name}' on Layer '{LayerMask.LayerToName(hit.collider.gameObject.layer)}'");
+            return false;
+        }
+
+        Debug.Log("SUCCESS - Player spotted!");
+        return true;
     }
 
     void FollowPath()
     {
-        if(currentPath == null || currentPath.Count == 0 || currentWayPointIndex >= currentPath.Count) 
+        if (currentPath == null || currentPath.Count == 0 || currentWaypointIndex >= currentPath.Count)
             return;
 
-        Vector3 targetWayPoint = currentPath[currentWayPointIndex];
-        targetWayPoint.y = transform.position.y;                    // Monster should not fly
+        // Get current target waypoint
+        Vector3 targetPos = currentPath[currentWaypointIndex];
+        targetPos.y = transform.position.y; // Keep Y height locked to ground
 
-        // Move toward way point
-        transform.position = Vector3.MoveTowards(transform.position, targetWayPoint, moveSpeed * Time.deltaTime);
+        Vector3 dirToTarget = targetPos - transform.position;
 
-        // Rotate toward movement direction
-        Vector3 direction = (targetWayPoint - transform.position).normalized;
-        if(direction != Vector3.zero)
+        // Only rotate if we are reasonably far from the waypoint center
+        if (dirToTarget.sqrMagnitude > 0.05f)
         {
-            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            Quaternion targetRotation = Quaternion.LookRotation(dirToTarget.normalized, Vector3.up);
+            // Smooth out turning over time
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 10f);
         }
 
-        // When close enough to next way point, advance index
-        if(Vector3.Distance(transform.position, targetWayPoint) < wayPointThreshold)
+        // Move forward
+        transform.position = Vector3.MoveTowards(transform.position, targetPos, moveSpeed * Time.deltaTime);
+
+        // Advance to next waypoint when within threshold distance
+        if (Vector3.Distance(transform.position, targetPos) < waypointThreshold)
         {
-            currentWayPointIndex++;
+            currentWaypointIndex++;
         }
     }
 }
