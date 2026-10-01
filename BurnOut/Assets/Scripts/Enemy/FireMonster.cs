@@ -57,14 +57,6 @@ public class FireMonster : Enemy
     // Update is called once per frame
     void Update()
     {
-        // If invoke repeating does not work
-        // timer += Time.deltaTime;
-        // if (timer >= pathUpdateInterval)
-        // {
-        //     timer = 0f;
-        //     UpdatePath();
-        // }
-
         // Only move along path when player is spotted
         if(hasSpottedPlayer)
         {
@@ -106,7 +98,7 @@ public class FireMonster : Enemy
     {
         if (player == null) 
         {
-            Debug.LogWarning("[FOV Diagnostic] Player reference is NULL!");
+            Debug.LogWarning("Player reference is NULL!");
             return false;
         }
 
