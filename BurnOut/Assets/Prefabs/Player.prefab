@@ -5138,7 +5138,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   speed: 5
-  swapMovement: 1
+  swapMovement: 0
 --- !u!1 &7776100051553765930
 GameObject:
   m_ObjectHideFlags: 0
