@@ -37,6 +37,7 @@ public class FireMonster : Enemy
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        // Just in case the parent 3D object is misaligned with the component
         foreach (Transform child in transform)
         {
             child.localRotation = Quaternion.identity;
