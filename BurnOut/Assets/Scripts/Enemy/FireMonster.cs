@@ -24,7 +24,6 @@ public class FireMonster : Enemy
     private List<Vector3> currentPath = new List<Vector3>();    // Current path from enemy to player (Only active when player spotted)
     private int currentWaypointIndex = 0;
     private bool hasSpottedPlayer = false;
-
     public enum MonsterBehavior
     {
         Patrol,     // Not Implemented
@@ -35,8 +34,9 @@ public class FireMonster : Enemy
     public MonsterBehavior currentBehavior; // Later will be used for state changes
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    protected override void Start()
     {
+        base.Start();
         // Just in case the parent 3D object is misaligned with the component
         foreach (Transform child in transform)
         {
@@ -56,10 +56,12 @@ public class FireMonster : Enemy
     }
 
     // Update is called once per frame
-    void Update()
+    protected override void Update()
     {
+        base.Update();
+        timeSinceDmg += Time.deltaTime;
         // Only move along path when player is spotted
-        if(hasSpottedPlayer)
+        if (hasSpottedPlayer)
         {
             FollowPath();
         }
@@ -163,4 +165,6 @@ public class FireMonster : Enemy
             currentWaypointIndex++;
         }
     }
+
+
 }

@@ -8,14 +8,14 @@ public class Fire : Enemy
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    protected override void Start()
     {
         // Initialize position of itself. In case of fire it will never be updated again.
         position = transform.position;
     }
 
     // Update is called once per frame
-    void Update()
+    protected override void Update()
     {
         
     }
