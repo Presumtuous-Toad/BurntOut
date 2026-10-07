@@ -14,6 +14,11 @@ public abstract class Enemy : MonoBehaviour, IDamageable
 
     public Vector3 position;
 
+    // related to enemy dealing damage to player 
+    public int damage;
+    public float dealDamageCooldown = 0.2f;         
+    private float currentDealDamageCooldown = 0; 
+
     public EnemyState state = EnemyState.Alive;
 
     // This can be changed to IHealth Interface if we have entities that need 
@@ -26,9 +31,14 @@ public abstract class Enemy : MonoBehaviour, IDamageable
     }
 
     // Update is called once per frame
-    void Update()
+    protected void Update()
     {
-        
+        float deltaTime = Time.deltaTime;
+
+        if(currentDealDamageCooldown > 0)
+        {
+            currentDealDamageCooldown -= deltaTime;
+        }
     }
 
     // Interaction with the water hose and taking damage needs to be made.
@@ -37,5 +47,16 @@ public abstract class Enemy : MonoBehaviour, IDamageable
     {
         if (state == EnemyState.Alive)
             Health -= damage;
+    }
+
+    public int DealDamage()
+    {
+        if(currentDealDamageCooldown <= 0)
+        {
+            currentDealDamageCooldown = dealDamageCooldown;
+            return damage;
+        }
+
+        return 0;
     }
 }
