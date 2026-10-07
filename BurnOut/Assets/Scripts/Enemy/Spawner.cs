@@ -7,13 +7,13 @@ using UnityEngine;
 public class Spawner : Enemy
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    protected override void Start()
     {
         position = transform.position;
     }
 
     // Update is called once per frame
-    void Update()
+    protected override void Update()
     {
         
     }

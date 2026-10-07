@@ -5,9 +5,8 @@ public class GunController : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private Camera mainCamera;
-    [SerializeField]private ParticleSystem hose;
+    [SerializeField] private ParticleSystem hose;
     [SerializeField] private InputActionReference hoseAction;
-
 
     private void Start()
     {
@@ -42,6 +41,8 @@ public class GunController : MonoBehaviour
     {
         if(hose.isPlaying) hose.Stop();
     }
+
+
 
     
 }
