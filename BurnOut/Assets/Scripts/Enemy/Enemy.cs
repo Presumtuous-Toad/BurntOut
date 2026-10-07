@@ -21,32 +21,46 @@ public abstract class Enemy : MonoBehaviour, IDamageable
 
     public EnemyState state = EnemyState.Alive;
 
+    [field: Header("Damage Settings")]
+    [field: SerializeField] public float dmgCooldown { get; set; } 
+    [field: SerializeField] public float timeSinceDmg { get; set; }
     // This can be changed to IHealth Interface if we have entities that need 
-    public int Health { get; set; }
+    [field: SerializeField] public int Health { get; set; } 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    protected virtual void Start()
     {
-        
+        timeSinceDmg = dmgCooldown;
     }
 
     // Update is called once per frame
-    protected void Update()
+
+    protected virtual void Update()
     {
         float deltaTime = Time.deltaTime;
-
+        timeSinceDmg += deltaTime;
         if(currentDealDamageCooldown > 0)
         {
             currentDealDamageCooldown -= deltaTime;
         }
-    }
+     }
 
     // Interaction with the water hose and taking damage needs to be made.
 
     public void TakeDamage(int damage)
     {
-        if (state == EnemyState.Alive)
+        if (state == EnemyState.Alive && timeSinceDmg > dmgCooldown) 
+        {
             Health -= damage;
+            timeSinceDmg = 0;
+            Debug.Log("TOOK DAMAGE");
+        }
+
+        if (Health <= 0)
+        {
+            state = EnemyState.Dead;
+            gameObject.SetActive(false);
+        }
     }
 
     public int DealDamage()
