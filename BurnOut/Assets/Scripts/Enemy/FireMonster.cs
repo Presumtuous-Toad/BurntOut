@@ -53,10 +53,6 @@ public class FireMonster : Enemy
 
         position = transform.position;
         InvokeRepeating(nameof(UpdatePath), 0f, pathUpdateInterval);    // Request Path updates on a timer
-
-        Health = 10;
-        dmgCooldown = 0.5f;
-        timeSinceDmg = dmgCooldown;
     }
 
     // Update is called once per frame

@@ -16,11 +16,11 @@ public abstract class Enemy : MonoBehaviour, IDamageable
 
     public EnemyState state = EnemyState.Alive;
 
-    [Header("Damage Settings")]
-    public float dmgCooldown { get; set; } = 0.5f;
-    public float timeSinceDmg { get; set; }
+    [field: Header("Damage Settings")]
+    [field: SerializeField] public float dmgCooldown { get; set; } 
+    [field: SerializeField] public float timeSinceDmg { get; set; }
     // This can be changed to IHealth Interface if we have entities that need 
-    public int Health { get; set; } = 10;
+    [field: SerializeField] public int Health { get; set; } 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     protected virtual void Start()
