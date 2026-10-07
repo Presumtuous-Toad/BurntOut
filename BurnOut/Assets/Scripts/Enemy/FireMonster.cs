@@ -65,6 +65,8 @@ public class FireMonster : Enemy
         {
             FollowPath();
         }
+
+        base.Update();
     }
 
     void UpdatePath()

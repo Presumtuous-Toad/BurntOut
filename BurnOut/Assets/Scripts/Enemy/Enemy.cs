@@ -14,6 +14,11 @@ public abstract class Enemy : MonoBehaviour, IDamageable
 
     public Vector3 position;
 
+    // related to enemy dealing damage to player 
+    public int damage;
+    public float dealDamageCooldown = 0.2f;         
+    private float currentDealDamageCooldown = 0; 
+
     public EnemyState state = EnemyState.Alive;
 
     [field: Header("Damage Settings")]
@@ -29,10 +34,16 @@ public abstract class Enemy : MonoBehaviour, IDamageable
     }
 
     // Update is called once per frame
+
     protected virtual void Update()
     {
-        timeSinceDmg += Time.deltaTime;
-    }
+        float deltaTime = Time.deltaTime;
+        timeSinceDmg += deltaTime;
+        if(currentDealDamageCooldown > 0)
+        {
+            currentDealDamageCooldown -= deltaTime;
+        }
+     }
 
     // Interaction with the water hose and taking damage needs to be made.
 
@@ -50,5 +61,16 @@ public abstract class Enemy : MonoBehaviour, IDamageable
             state = EnemyState.Dead;
             gameObject.SetActive(false);
         }
+    }
+
+    public int DealDamage()
+    {
+        if(currentDealDamageCooldown <= 0)
+        {
+            currentDealDamageCooldown = dealDamageCooldown;
+            return damage;
+        }
+
+        return 0;
     }
 }
