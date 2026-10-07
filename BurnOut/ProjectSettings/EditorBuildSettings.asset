@@ -12,7 +12,7 @@ EditorBuildSettings:
     path: Assets/Scenes/TitleScreen.unity
     guid: 1c50d74b8c053fb428b7edf52018b017
   - enabled: 1
-    path: Assets/Scenes/MovementDirections/Option1.unity
+    path: Assets/Scenes/LevelLayout.unity
     guid: 9639d8fba09c9aa40a453f2a3e376292
   - enabled: 1
     path: Assets/Scenes/MovementDirections/Option2.unity
