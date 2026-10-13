@@ -1,3 +1,4 @@
+using System.IO.MemoryMappedFiles;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -6,13 +7,25 @@ public class GunController : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private Camera mainCamera;
     [SerializeField] private ParticleSystem hose;
-    [SerializeField] private InputActionReference hoseAction;
-
+    [SerializeField] private InputActionReference attackAction;
+    [SerializeField] private InputActionReference reloadAction;
+    [SerializeField] private int maxAmmo;
+    [field: SerializeField]public int ammo { get; private set; }
+    private bool reloading;
+    private bool firing;
+    [SerializeField] private float reloadSpeed; //how long it takes to reload
+    [SerializeField] private ReloadBar ReloadBar;
     private void Start()
     {
         mainCamera = Camera.main;
-        hoseAction.action.started += OnHoseStarted;
-        hoseAction.action.canceled += OnHoseStopped;
+        attackAction.action.started += OnHoseStarted;
+        attackAction.action.canceled += OnHoseStopped;
+        reloadAction.action.performed += OnReaoad;
+
+        firing = false;
+        ammo = maxAmmo;
+        reloading = false;
+        
     }
     // Update is called once per frame
     void Update()
@@ -30,19 +43,49 @@ public class GunController : MonoBehaviour
                 transform.rotation = Quaternion.LookRotation(-lookDirection);
             }
         }
+        if(firing)
+        {
+            ammo--;
+            if (ammo < 0)
+            {
+                ammo = 0;
+                hose.Stop();
+                firing = false;
+            }
+        }
+
     }
 
     private void OnHoseStarted(InputAction.CallbackContext context)
     {
-        if(!hose.isPlaying)  hose.Play();
+        if (!hose.isPlaying && ammo > 0 && !reloading)
+        {
+            firing = true;
+            hose.Play();
+        }
     }
 
     private void OnHoseStopped(InputAction.CallbackContext context)
     {
         if(hose.isPlaying) hose.Stop();
+        firing = false;
     }
 
+    private void OnReaoad(InputAction.CallbackContext context)
+    {
+        if (!reloading)
+        {            
+            reloading = true;
+            ReloadBar.reload();
+            Invoke(nameof(ReloadComplete), reloadSpeed);
+        }
+        
+    }
 
-
+    private void ReloadComplete()
+    {
+        ammo = maxAmmo;
+        reloading = false;
+    }
     
 }
