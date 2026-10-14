@@ -1,6 +1,7 @@
 using System.IO.MemoryMappedFiles;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class GunController : MonoBehaviour
 {
@@ -15,6 +16,8 @@ public class GunController : MonoBehaviour
     private bool firing;
     [SerializeField] private float reloadSpeed; //how long it takes to reload
     [SerializeField] private ReloadBar ReloadBar;
+    public Slider ammoSlider;
+
     private void Start()
     {
         mainCamera = Camera.main;
@@ -25,6 +28,9 @@ public class GunController : MonoBehaviour
         firing = false;
         ammo = maxAmmo;
         reloading = false;
+
+        ammoSlider.maxValue = maxAmmo;
+        ammoSlider.value = ammo;
         
     }
     // Update is called once per frame
@@ -53,7 +59,7 @@ public class GunController : MonoBehaviour
                 firing = false;
             }
         }
-
+        ammoSlider.value = ammo;
     }
 
     private void OnHoseStarted(InputAction.CallbackContext context)

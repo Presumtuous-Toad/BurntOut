@@ -605,7 +605,7 @@ MonoBehaviour:
   m_PreserveMeshAssetOnDestroy: 0
   assetGuid: 
   m_Mesh: {fileID: 0}
-  m_VersionIndex: 2843
+  m_VersionIndex: 2858
   m_IsSelectable: 1
   m_SelectedFaces: 
   m_SelectedEdges: []
@@ -5770,6 +5770,7 @@ GameObject:
   - component: {fileID: 1730617579262322011}
   - component: {fileID: 4058440852035816272}
   - component: {fileID: 789335074507767610}
+  - component: {fileID: 1157531551716352697}
   m_Layer: 2
   m_Name: Player
   m_TagString: Player
@@ -5914,6 +5915,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   speed: 5
   swapMovement: 0
+--- !u!114 &1157531551716352697
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7173622043332317989}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 079d632bdc63fc749b43b2d710ebc62b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
+  maxHealth: 100
+  healthBar: {fileID: 0}
 --- !u!1 &7776100051553765930
 GameObject:
   m_ObjectHideFlags: 0
@@ -5967,3 +5982,4 @@ MonoBehaviour:
   <ammo>k__BackingField: 0
   reloadSpeed: 2
   ReloadBar: {fileID: 6295752159868001509}
+  ammoSlider: {fileID: 0}
