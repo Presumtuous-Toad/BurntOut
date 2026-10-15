@@ -26,7 +26,9 @@ public class FireMonster : Enemy
     
     
     private bool hasSpottedPlayer = false;
-    private Vector3 lastPlayerSpotted;
+    private Vector3 lastPlayerLocation = Vector3.zero;
+
+    public Room currentRoom;              // Room that the monster is currently in
 
     public enum PatrolOption
     {
@@ -42,7 +44,8 @@ public class FireMonster : Enemy
     {
         Patrol,     // Picks patrol points whem in a room. 
         Chase,      // Need to optimize A* for enemy
-        Attack      // Implemented but currently it is in collision state. If that is true, this might not need to be present.
+        Attack      // Implemented but currently it is in collision state. I
+                    // if that is true, this might not need to be present.
     }
     
     public MonsterBehavior currentBehavior; // Later will be used for state changes
@@ -65,9 +68,8 @@ public class FireMonster : Enemy
             return;
         }
 
+        // Current Position and Current Behavior
         position = transform.position;
-        InvokeRepeating(nameof(UpdatePath), 0f, pathUpdateInterval);    // Request Path updates on a timer
-
         currentBehavior = MonsterBehavior.Patrol;
     }
 
@@ -77,13 +79,36 @@ public class FireMonster : Enemy
         base.Update();
         timeSinceDmg += Time.deltaTime;
 
+        // Fire monster switching behavior
         switch(currentBehavior)
         {
             case MonsterBehavior.Patrol:
+            // Cancel Invoke
+            CancelInvoke(nameof(UpdatePath));
 
+            if(lastPlayerLocation == Vector3.zero)  // This means that the Fire Monster has never spotted the player
+            {
+                // Generate general patrol points around the room depending on type
+                if(currentPatrolOption == PatrolOption.Loop)
+                {
+                    patrolPoints = currentRoom.GenerateLoopPatrolPoints();
+                }
+                else if(currentPatrolOption == PatrolOption.Line)
+                {
+                    patrolPoints = currentRoom.GenerateLinePatrolPoints();
+                }
+            }
+            else // This means Fire Monster has spotted the player at least once
+            {
+                // Form patrol points around last spotted location. 
+                // If it fails to create desired patrol path, it will spawn back to current room by resetting player vector to zero
+            }
             break;
 
             case MonsterBehavior.Chase: 
+            // Request Path updates on a timer 
+            InvokeRepeating(nameof(UpdatePath), 0f, pathUpdateInterval);   
+
             // Only move along path when player is spotted
             if (hasSpottedPlayer)                           
             {
@@ -103,6 +128,8 @@ public class FireMonster : Enemy
             currentBehavior = MonsterBehavior.Chase;
 
             List<Node> rawPath = pathFinding.FindPath(transform.position, player.position);
+
+            lastPlayerLocation = player.position;       // Update last player location
 
             if (rawPath != null && rawPath.Count > 1)
             {
@@ -165,6 +192,9 @@ public class FireMonster : Enemy
         return true;
     }
 
+    /// <summary>
+    /// Fire Monster follows the path towards player.
+    /// </summary>
     void FollowPath()
     {
         if (currentPath == null || currentPath.Count == 0 || currentWaypointIndex >= currentPath.Count)
@@ -194,5 +224,9 @@ public class FireMonster : Enemy
         }
     }
 
-
+    // Fire Monster gets alerted when player enters the room
+    public void Alert()
+    {
+        currentBehavior = MonsterBehavior.Chase;
+    }
 }

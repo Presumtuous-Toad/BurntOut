@@ -142,6 +142,8 @@ MonoBehaviour:
   obstacleMask:
     serializedVersion: 2
     m_Bits: 64
+  currentRoom: {fileID: 0}
+  currentPatrolOption: 0
   currentBehavior: 1
 --- !u!54 &2009676583999894389
 Rigidbody:
