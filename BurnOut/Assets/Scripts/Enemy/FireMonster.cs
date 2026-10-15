@@ -85,7 +85,7 @@ public class FireMonster : Enemy
 
             case MonsterBehavior.Chase: 
             // Only move along path when player is spotted
-            if (hasSpottedPlayer)                           // 
+            if (hasSpottedPlayer)                           
             {
                 FollowPath();
             }
