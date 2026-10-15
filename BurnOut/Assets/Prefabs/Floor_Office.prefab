@@ -48,21 +48,9 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1127483968529461900, guid: e84ea38bdf4a25d4989af88a9f57f8af, type: 3}
-      propertyPath: m_Mesh
-      value: 
-      objectReference: {fileID: 0}
     - target: {fileID: 5110729464399345180, guid: e84ea38bdf4a25d4989af88a9f57f8af, type: 3}
       propertyPath: m_Name
-      value: Floor_Bed1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6203683999509708342, guid: e84ea38bdf4a25d4989af88a9f57f8af, type: 3}
-      propertyPath: m_Mesh
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 6988479501875113950, guid: e84ea38bdf4a25d4989af88a9f57f8af, type: 3}
-      propertyPath: m_Mesh
-      value: 
+      value: Floor_Office
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
