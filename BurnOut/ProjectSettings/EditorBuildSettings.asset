@@ -12,12 +12,18 @@ EditorBuildSettings:
     path: Assets/Scenes/TitleScreen.unity
     guid: 1c50d74b8c053fb428b7edf52018b017
   - enabled: 1
+    path: Assets/Scenes/Test Scenes/PlayerTakeDamage/PlayerTakeDamage.unity
+    guid: 79b6afbe281d9aa42baf51097f69c987
+  - enabled: 1
+    path: Assets/Scenes/LoseScreen.unity
+    guid: f84cab4e4ce600d4fab681c4d55494a9
+  - enabled: 0
     path: Assets/Scenes/LevelLayout.unity
     guid: 9639d8fba09c9aa40a453f2a3e376292
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/MovementDirections/Option2.unity
     guid: a226726dc8e259c4b96d317e02ff7f3a
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/MovementDirections/Option3.unity
     guid: 3b15972cdf8e817418aea3ee04e2f95c
   m_configObjects:

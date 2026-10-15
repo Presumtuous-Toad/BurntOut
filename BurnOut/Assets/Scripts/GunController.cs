@@ -93,5 +93,11 @@ public class GunController : MonoBehaviour
         ammo = maxAmmo;
         reloading = false;
     }
-    
+
+    private void OnDestroy()
+    {
+        attackAction.action.started -= OnHoseStarted;
+        attackAction.action.canceled -= OnHoseStopped;
+        reloadAction.action.performed -= OnReaoad;
+    }
 }

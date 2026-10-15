@@ -1,4 +1,6 @@
+using Unity.VectorGraphics;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class PlayerHealth : MonoBehaviour, IDamageable
@@ -31,7 +33,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
     public void Death()
     {
-        // TO DO: Load Death canvas, start menu, etc 
+        SceneManager.LoadScene(2);
     }
 
     private void OnCollisionEnter(Collision collision)
