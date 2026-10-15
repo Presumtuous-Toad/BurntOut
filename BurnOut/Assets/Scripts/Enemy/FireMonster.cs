@@ -13,6 +13,10 @@ public class FireMonster : Enemy
     public float pathUpdateInterval = 1.0f; // Calculating new path happens 5 times per second when chasing player.
     public float waypointThreshold = 0.2f;
 
+    private PathFinding pathFinding;
+    private List<Vector3> currentPath = new List<Vector3>();    // Current path from enemy to player (Only active when player spotted)
+    private int currentWaypointIndex = 0;
+
     private float timer;
 
     public float viewRadius = 12f;
@@ -20,10 +24,17 @@ public class FireMonster : Enemy
     public float viewAngle = 90f;
     public LayerMask obstacleMask;         // This might have to change - currently unwalkable = obstacle mask but there could be unwalkable places where it is not an obstacle
     
-    private PathFinding pathFinding;
-    private List<Vector3> currentPath = new List<Vector3>();    // Current path from enemy to player (Only active when player spotted)
-    private int currentWaypointIndex = 0;
+    
     private bool hasSpottedPlayer = false;
+    private Vector3 lastPlayerSpotted;
+
+    public enum PatrolOption
+    {
+        Loop,   // Enemy patrols in a loop
+        Line    // Enemy patrols in a line
+    }
+
+    public PatrolOption currentPatrolOption;
 
     private List<Vector3> patrolPoints;
 
@@ -72,9 +83,9 @@ public class FireMonster : Enemy
 
             break;
 
-            case MonsterBehavior.Chase:
+            case MonsterBehavior.Chase: 
             // Only move along path when player is spotted
-            if (hasSpottedPlayer)
+            if (hasSpottedPlayer)                           // 
             {
                 FollowPath();
             }
