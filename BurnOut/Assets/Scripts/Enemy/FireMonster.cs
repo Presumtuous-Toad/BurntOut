@@ -24,11 +24,14 @@ public class FireMonster : Enemy
     private List<Vector3> currentPath = new List<Vector3>();    // Current path from enemy to player (Only active when player spotted)
     private int currentWaypointIndex = 0;
     private bool hasSpottedPlayer = false;
+
+    private List<Vector3> patrolPoints;
+
     public enum MonsterBehavior
     {
-        Patrol,     // Not Implemented
+        Patrol,     // Picks patrol points whem in a room. 
         Chase,      // Need to optimize A* for enemy
-        Attack      // Not implemented
+        Attack      // Implemented but currently it is in collision state. If that is true, this might not need to be present.
     }
     
     public MonsterBehavior currentBehavior; // Later will be used for state changes
@@ -53,6 +56,8 @@ public class FireMonster : Enemy
 
         position = transform.position;
         InvokeRepeating(nameof(UpdatePath), 0f, pathUpdateInterval);    // Request Path updates on a timer
+
+        currentBehavior = MonsterBehavior.Patrol;
     }
 
     // Update is called once per frame
@@ -60,10 +65,20 @@ public class FireMonster : Enemy
     {
         base.Update();
         timeSinceDmg += Time.deltaTime;
-        // Only move along path when player is spotted
-        if (hasSpottedPlayer)
+
+        switch(currentBehavior)
         {
-            FollowPath();
+            case MonsterBehavior.Patrol:
+
+            break;
+
+            case MonsterBehavior.Chase:
+            // Only move along path when player is spotted
+            if (hasSpottedPlayer)
+            {
+                FollowPath();
+            }
+            break;
         }
     }
 
@@ -74,6 +89,7 @@ public class FireMonster : Enemy
         if (CanSeePlayer())
         {
             hasSpottedPlayer = true;
+            currentBehavior = MonsterBehavior.Chase;
 
             List<Node> rawPath = pathFinding.FindPath(transform.position, player.position);
 
@@ -93,7 +109,8 @@ public class FireMonster : Enemy
         else
         {
             // Line-of-sight broken, but let monster will smoothly finish walking to the player's last known position.
-            hasSpottedPlayer = false; 
+            hasSpottedPlayer = false;
+            currentBehavior = MonsterBehavior.Patrol;
         }
     }
 

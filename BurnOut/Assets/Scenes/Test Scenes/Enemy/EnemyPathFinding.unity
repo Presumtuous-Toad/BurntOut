@@ -540,7 +540,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Fire
   position: {x: 0, y: 0, z: 0}
+  damage: 0
+  dealDamageCooldown: 0.2
   state: 0
+  <dmgCooldown>k__BackingField: 0
+  <timeSinceDmg>k__BackingField: 0
+  <Health>k__BackingField: 0
 --- !u!135 &643133208
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -1171,6 +1176,14 @@ PrefabInstance:
     - target: {fileID: 5088887068201228494, guid: 0fd117759a220480080e6edcb67ae7ad, type: 3}
       propertyPath: m_Name
       value: Map
+      objectReference: {fileID: 0}
+    - target: {fileID: 8630559119202574612, guid: 0fd117759a220480080e6edcb67ae7ad, type: 3}
+      propertyPath: gridWorldSize.x
+      value: 440
+      objectReference: {fileID: 0}
+    - target: {fileID: 8630559119202574612, guid: 0fd117759a220480080e6edcb67ae7ad, type: 3}
+      propertyPath: gridWorldSize.y
+      value: 440
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
