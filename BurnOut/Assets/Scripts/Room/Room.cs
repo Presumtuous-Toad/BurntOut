@@ -12,7 +12,7 @@ public class Room : MonoBehaviour
 
     // Make sure 'this' room's trigger collider is assigned
     [Header("Collider MUST be TRIGGER collider.")]
-    private Collider roomTrigger;
+    public Collider roomTrigger;
 
     private Bounds bounds;
 
