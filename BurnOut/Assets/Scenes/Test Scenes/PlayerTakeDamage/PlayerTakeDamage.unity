@@ -20743,7 +20743,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f04cb26b5c1684622a026fd5b9519a09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Room
-  wallInset: 1
+  wallInset: 3
   roomColliders:
   - {fileID: 437499396}
   fireMonsters: []
@@ -46579,7 +46579,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f04cb26b5c1684622a026fd5b9519a09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Room
-  wallInset: 1
+  wallInset: 3
   roomColliders:
   - {fileID: 812633202}
   fireMonsters:
@@ -72158,7 +72158,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f04cb26b5c1684622a026fd5b9519a09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Room
-  wallInset: 1
+  wallInset: 3
   roomColliders:
   - {fileID: 1185389891}
   fireMonsters:
@@ -75694,6 +75694,14 @@ PrefabInstance:
       propertyPath: player
       value: 
       objectReference: {fileID: 2018987056}
+    - target: {fileID: 5253152187513202408, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
+      propertyPath: viewAngle
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 5253152187513202408, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
+      propertyPath: viewRadius
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 5253152187513202408, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
       propertyPath: dealDamageCooldown
       value: 0.8
@@ -82179,7 +82187,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f04cb26b5c1684622a026fd5b9519a09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Room
-  wallInset: 1
+  wallInset: 3
   roomColliders:
   - {fileID: 1323012498}
   fireMonsters:
@@ -99570,7 +99578,7 @@ PrefabInstance:
       objectReference: {fileID: 2018987056}
     - target: {fileID: 5253152187513202408, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
       propertyPath: viewAngle
-      value: 90
+      value: 120
       objectReference: {fileID: 0}
     - target: {fileID: 5253152187513202408, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
       propertyPath: viewRadius
@@ -112941,7 +112949,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f04cb26b5c1684622a026fd5b9519a09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Room
-  wallInset: 1
+  wallInset: 3
   roomColliders:
   - {fileID: 1769473166}
   fireMonsters: []
@@ -117805,7 +117813,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f04cb26b5c1684622a026fd5b9519a09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Room
-  wallInset: 1
+  wallInset: 3
   roomColliders:
   - {fileID: 1856588380}
   fireMonsters: []
@@ -129389,7 +129397,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f04cb26b5c1684622a026fd5b9519a09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Room
-  wallInset: 1
+  wallInset: 3
   roomColliders:
   - {fileID: 2055349154}
   fireMonsters: []
@@ -136868,6 +136876,14 @@ PrefabInstance:
       propertyPath: player
       value: 
       objectReference: {fileID: 2018987056}
+    - target: {fileID: 5253152187513202408, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
+      propertyPath: viewAngle
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 5253152187513202408, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
+      propertyPath: viewRadius
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 5253152187513202408, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
       propertyPath: dealDamageCooldown
       value: 0.8
