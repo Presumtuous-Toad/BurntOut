@@ -141,7 +141,7 @@ public class FireMonster : Enemy
             if(currentRoom != null)
             {
                 patrolPoints = (currentPatrolOption == PatrolOption.Loop) ?
-                                currentRoom.GenerateLoopPatrolPoints() : currentRoom.GenerateLinePatrolPoints();
+                                currentRoom.GenerateLoopPatrolPoints(pathFinding) : currentRoom.GenerateLinePatrolPoints();
                 currentPatrolIndex = 0;
                 RequestPathTo(patrolPoints[currentPatrolIndex]);
             }
@@ -150,52 +150,71 @@ public class FireMonster : Enemy
 
     void ProcessPatrolState()
     {
-        // When current A* path finishes:
-        if (currentPath == null || currentWaypointIndex >= currentPath.Count)
-        {
-            if (isSpawningFire) return; // Cannot patrol
+        if (isSpawningFire) return;
 
-            // Monster had spotted player and hasn't investigated last location yet
-            if (lastPlayerLocation != Vector3.zero)
+            // Trigger when monster has no path or has reached the end of its current path
+            if (currentPath == null || currentPath.Count == 0 || currentWaypointIndex >= currentPath.Count)
             {
-                // Request room to generate search points around last known position
-                List<Vector3> searchPoints = (currentRoom != null) 
-                    ? currentRoom.GenerateSearchPointsAround(lastPlayerLocation, pathFinding) 
-                    : null;
-
-                if (searchPoints != null && searchPoints.Count > 0)
+                // If monster knows last spotted location, try to make patrol there
+                if (lastPlayerLocation != Vector3.zero)
                 {
-                    // Assign search loop around last spotted location
-                    patrolPoints = searchPoints;
-                    currentPatrolIndex = 0;
-                    lastPlayerLocation = Vector3.zero; // Clear so it only generates once upon arrival
-                    RequestPathTo(patrolPoints[currentPatrolIndex]);
-                    return;
+                    Debug.Log($"[FireMonster] Investigating last spotted location: {lastPlayerLocation}");
+
+                    List<Vector3> searchPoints = (currentRoom != null)
+                        ? currentRoom.GenerateSearchPointsAround(lastPlayerLocation, pathFinding)
+                        : null;
+
+                    if (searchPoints != null && searchPoints.Count > 0)
+                    {
+                        patrolPoints = searchPoints;
+                        currentPatrolIndex = 0;
+                        lastPlayerLocation = Vector3.zero; // Clear trigger so it only fires once upon arrival
+                        
+                        if (!RequestPathTo(patrolPoints[currentPatrolIndex]))
+                        {
+                            // Fallback if pathing fails
+                            lastPlayerLocation = Vector3.zero;
+                            patrolPoints.Clear();
+                        }
+                        return;
+                    }
+                    else
+                    {
+                        // Revert to room patrol
+                        lastPlayerLocation = Vector3.zero;
+                    }
+                }
+
+                // Room Patrol loop
+                if (patrolPoints == null || patrolPoints.Count == 0)
+                {
+                    if (currentRoom != null)
+                    {
+                        patrolPoints = (currentPatrolOption == PatrolOption.Loop)
+                            ? currentRoom.GenerateLoopPatrolPoints(pathFinding)
+                            : currentRoom.GenerateLinePatrolPoints();
+
+                        currentPatrolIndex = 0;
+                    }
                 }
                 else
                 {
-                    // Not able to form a patrol path around last known location. Reset to room patrol
-                    lastPlayerLocation = Vector3.zero;
+                    // Advance to next waypoint index
+                    currentPatrolIndex = (currentPatrolIndex + 1) % patrolPoints.Count;
+                }
+
+                // Request path to active patrol index
+                if (patrolPoints != null && patrolPoints.Count > 0)
+                {
+                    bool pathSuccess = RequestPathTo(patrolPoints[currentPatrolIndex]);
+
+                    // If pathfinding returned null, skip to next index so it doesn't stop moving
+                    if (!pathSuccess)
+                    {
+                        currentPatrolIndex = (currentPatrolIndex + 1) % patrolPoints.Count;
+                    }
                 }
             }
-
-            // Standard Room Patrol Loop
-            if (patrolPoints != null && patrolPoints.Count > 0)
-            {
-                currentPatrolIndex = (currentPatrolIndex + 1) % patrolPoints.Count;
-                RequestPathTo(patrolPoints[currentPatrolIndex]);
-            }
-            else if (currentRoom != null)
-            {
-                // Initialize room patrol points if list is empty
-                patrolPoints = (currentPatrolOption == PatrolOption.Loop)
-                    ? currentRoom.GenerateLoopPatrolPoints()
-                    : currentRoom.GenerateLinePatrolPoints();
-
-                currentPatrolIndex = 0;
-                if (patrolPoints.Count > 0) RequestPathTo(patrolPoints[0]);
-            }
-        }
     }
 
     /// <summary>
@@ -265,25 +284,29 @@ public class FireMonster : Enemy
         }
     }
 
-    void RequestPathTo(Vector3 targetPos)
+    bool RequestPathTo(Vector3 targetPos)
     {
-        if (pathFinding == null) return;
+        if (pathFinding == null) return false;
 
         List<Node> rawPath = pathFinding.FindPath(transform.position, targetPos);
 
-        if (rawPath != null && rawPath.Count > 1)
+        if (rawPath == null || rawPath.Count <= 1)
         {
-            currentPath.Clear();
-            for (int i = 1; i < rawPath.Count; i++)         // Skip node 0 - it is the point we are currently starting from
-            {
-                currentPath.Add(rawPath[i].worldPosition);
-            }
-            currentWaypointIndex = 0;
+            return false; // Path failed or target unwalkable
         }
+
+        currentPath.Clear();
+        for (int i = 1; i < rawPath.Count; i++)
+        {
+            currentPath.Add(rawPath[i].worldPosition);
+        }
+
+        currentWaypointIndex = 0;
+        return true; 
     }
 
     /// <summary>
-    /// Fire Monster follows the path towards player.
+    /// Fire Monster follows given path.
     /// </summary>
     void FollowPath()
     {

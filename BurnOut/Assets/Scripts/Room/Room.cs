@@ -12,7 +12,7 @@ public class Room : MonoBehaviour
 
     // Make sure 'this' room's trigger collider is assigned
     [Header("Collider MUST be TRIGGER collider.")]
-    public Collider roomTrigger;
+    public List<Collider> roomColliders = new List<Collider>();
 
     private Bounds bounds;
 
@@ -31,14 +31,46 @@ public class Room : MonoBehaviour
     private int fires;
     private int MaxFires;   // Depends on room size. If number of fire reaches the amount of max fire, add behavior to move monster to another room.
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+
+    void Awake()
+    {
+        // Retrieve ALL colliders attached to this GameObject and its children
+        Collider[] colliders = GetComponentsInChildren<Collider>();
+
+        foreach (Collider collider in colliders)
+        {
+            if (collider.isTrigger) // Ensure we only collect trigger colliders
+            {
+                roomColliders.Add(collider);
+            }
+        }
+
+        if (roomColliders.Count > 0)
+        {
+            // Start bounds with the first collider
+            bounds = roomColliders[0].bounds;
+
+            // Encapsulate all additional colliders into one master bounding box
+            for (int i = 1; i < roomColliders.Count; i++)
+            {
+                bounds.Encapsulate(roomColliders[i].bounds);
+            }
+        }
+        else
+        {
+            Debug.LogError($"{gameObject.name} has no trigger colliders attached!");
+        }
+    }
+
     void Start()
     {
-        roomTrigger = GetComponent<Collider>();
-        if(roomTrigger != null)
+        // For monsters pre-registered, give them room reference
+        if(fireMonsters.Count > 0)
         {
-            // Retrieve bound for this room
-            bounds = roomTrigger.bounds;
+            foreach(FireMonster monster in fireMonsters)
+            {
+                monster.currentRoom = this;
+            }
         }
     }
 
@@ -108,7 +140,7 @@ public class Room : MonoBehaviour
     /// Returns a list of patrol points that forms a square. Allow Jitter to ensure not all enemies have the same path
     /// </summary>
     /// <returns>A list of patrol points</returns>
-    public List<Vector3> GenerateLoopPatrolPoints(float offsetJitter = 0.8f)
+    public List<Vector3> GenerateLoopPatrolPoints(PathFinding pathFinding, float offsetJitter = 0.8f)
     {
         List<Vector3> points = new List<Vector3>();
         Vector3 center = bounds.center;
@@ -126,10 +158,24 @@ public class Room : MonoBehaviour
         {
             float jitterX = Random.Range(-offsetJitter, offsetJitter);
             float jitterZ = Random.Range(-offsetJitter, offsetJitter);
-            points.Add(corner + new Vector3(jitterX, 0f, jitterZ));
-        }
+            Vector3 candidate = corner + new Vector3(jitterX, 0f, jitterZ);
 
-        return points;
+            // Validate point against A* grid node walkability
+            if (pathFinding != null && pathFinding.grid != null)
+            {
+                Node node = pathFinding.grid.NodeFromWorldPoint(candidate);
+                if (node != null && node.walkable)
+                {
+                    points.Add(node.worldPosition); // Use actual walkable node position
+                }
+            }
+            else
+            {
+                points.Add(candidate);
+            }
+    }
+
+    return points;
     }
 
     /// <summary>
