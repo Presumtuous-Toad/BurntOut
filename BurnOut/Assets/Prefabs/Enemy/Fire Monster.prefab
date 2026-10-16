@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 2009676583999894389}
   m_Layer: 0
   m_Name: Fire Monster
-  m_TagString: Untagged
+  m_TagString: Fire Monster
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -133,10 +133,10 @@ MonoBehaviour:
   <dmgCooldown>k__BackingField: 0
   <timeSinceDmg>k__BackingField: 0
   <Health>k__BackingField: 0
-  player: {fileID: 0}
   moveSpeed: 3
-  pathUpdateInterval: 0.2
+  chasePathUpdateInterval: 0.25
   waypointThreshold: 0.2
+  player: {fileID: 0}
   viewRadius: 12
   viewAngle: 360
   obstacleMask:
@@ -144,7 +144,11 @@ MonoBehaviour:
     m_Bits: 64
   currentRoom: {fileID: 0}
   currentPatrolOption: 0
-  currentBehavior: 1
+  currentBehavior: 0
+  firePrefab: {fileID: 8314636697169942334, guid: 82b98e9b5f6dce448a61baa923c2e53a, type: 3}
+  spawnFireEveryDistance: 3
+  fireOffsetDistance: 1.2
+  pauseAndSpawnDuration: 1
 --- !u!54 &2009676583999894389
 Rigidbody:
   m_ObjectHideFlags: 0
