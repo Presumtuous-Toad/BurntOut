@@ -13,9 +13,10 @@ GameObject:
   - component: {fileID: 6411892925316400671}
   - component: {fileID: 5745464109901306754}
   - component: {fileID: 5253152187513202408}
+  - component: {fileID: 2009676583999894389}
   m_Layer: 0
   m_Name: Fire Monster
-  m_TagString: Untagged
+  m_TagString: Fire Monster
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -126,14 +127,52 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FireMonster
   position: {x: 0, y: 0, z: 0}
+  damage: 0
+  dealDamageCooldown: 0.2
   state: 0
-  player: {fileID: 0}
+  <dmgCooldown>k__BackingField: 0
+  <timeSinceDmg>k__BackingField: 0
+  <Health>k__BackingField: 0
   moveSpeed: 3
-  pathUpdateInterval: 0.2
+  chasePathUpdateInterval: 0.25
   waypointThreshold: 0.2
+  player: {fileID: 0}
   viewRadius: 12
   viewAngle: 360
   obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  currentBehavior: 1
+  currentRoom: {fileID: 0}
+  currentPatrolOption: 0
+  currentBehavior: 0
+  firePrefab: {fileID: 8314636697169942334, guid: 82b98e9b5f6dce448a61baa923c2e53a, type: 3}
+  spawnFireEveryDistance: 3
+  fireOffsetDistance: 1.2
+  pauseAndSpawnDuration: 1
+--- !u!54 &2009676583999894389
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2620865638807337671}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0

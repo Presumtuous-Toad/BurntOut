@@ -45,8 +45,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable
         }
      }
 
-    // Interaction with the water hose and taking damage needs to be made.
-
+    // Enemy Takes the corresponding damage
     public void TakeDamage(int damage)
     {
         if (state == EnemyState.Alive && timeSinceDmg > dmgCooldown) 
@@ -63,6 +62,7 @@ public abstract class Enemy : MonoBehaviour, IDamageable
         }
     }
 
+    // Enemy deals the corresponding damage
     public int DealDamage()
     {
         if(currentDealDamageCooldown <= 0)
