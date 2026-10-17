@@ -25,7 +25,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         healthBar.value = currentHealth;
 
         // health below 0 play death event 
-        if (currentHealth < 0)
+        if (currentHealth <= 0)
         {
             Death();
         }
