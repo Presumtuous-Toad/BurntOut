@@ -17,12 +17,6 @@ public class HouseHealth : MonoBehaviour, IDamageable
         healthBar.value = currentHealth;
     }
 
-    public void CalculateDamage()
-    {
-        // TO DO:   Determine how many fires in house
-        //          Call take Damage
-    }
-
     public void TakeDamage(int damage)
     {
         currentHealth -= damage;

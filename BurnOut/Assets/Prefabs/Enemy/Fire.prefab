@@ -131,4 +131,5 @@ MonoBehaviour:
   state: 0
   <dmgCooldown>k__BackingField: 0
   <timeSinceDmg>k__BackingField: 0
-  <Health>k__BackingField: 0
+  <Health>k__BackingField: 1
+  room: {fileID: 0}

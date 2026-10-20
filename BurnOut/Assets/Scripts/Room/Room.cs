@@ -9,6 +9,7 @@ using UnityEngine.AI;
 public class Room : MonoBehaviour
 {
     public float wallInset = 2.5f;
+    public RoomManager roomManager;
 
     // Make sure 'this' room's trigger collider is assigned
     [Header("Collider MUST be TRIGGER collider.")]
@@ -120,9 +121,20 @@ public class Room : MonoBehaviour
     public void AddFire()
     {
         fires++;
-        if(IsMaxFiresReached())
+        roomManager.AddTotalFire();
+
+        if (IsMaxFiresReached())
         {
             OnMaxFiresReached();
+        }
+    }
+
+    public void RemoveFire()
+    {
+        if (fires > 0)
+        {
+            fires--;
+            roomManager.RemoveTotalFire();
         }
     }
 

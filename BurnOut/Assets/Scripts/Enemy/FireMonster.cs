@@ -254,14 +254,13 @@ public class FireMonster : Enemy
         {
             Vector3 spawnPos = transform.position + offset;
 
-            if (firePrefab != null)
+            if(currentRoom != null)
             {
-                Instantiate(firePrefab, spawnPos, Quaternion.identity);
-            }
-
-            if (currentRoom != null)
-            {
-                currentRoom.AddFire();
+                if (firePrefab != null /*&& !currentRoom.IsMaxFiresReached()*/)     // max fire not done yet
+                {
+                    Instantiate(firePrefab, spawnPos, Quaternion.identity, currentRoom.transform);
+                    currentRoom.AddFire();
+                }
             }
         }
 
