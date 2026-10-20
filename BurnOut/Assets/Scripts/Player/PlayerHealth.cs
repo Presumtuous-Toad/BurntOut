@@ -56,4 +56,24 @@ public class PlayerHealth : MonoBehaviour, IDamageable
         }
     }
 
+    private void OnTriggerEnter(Collider collision)
+    {
+        // determine collision type
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            int damage = collision.gameObject.GetComponent<Enemy>().DealDamage();
+            TakeDamage(damage);
+        }
+    }
+
+    private void OnTriggerStay(Collider collision)
+    {
+        // determine collision type
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            int damage = collision.gameObject.GetComponent<Enemy>().DealDamage();
+            if (damage > 0) TakeDamage(damage);
+        }
+    }
+
 }
