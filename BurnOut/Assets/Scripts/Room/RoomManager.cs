@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 /// <summary>
 /// Room Manager holds reference of all the rooms. This wil be the central system that identifies fires and deal damage to the house
@@ -7,18 +8,41 @@ using System.Collections.Generic;
 public class RoomManager : MonoBehaviour
 {
     private List<Room> rooms;
+    private HouseHealth health;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public int damagePreFire = 1;
+    public float damageTickRate = 5f;
+    private float currentTime;
+    public int totalFire;
+    private void Awake()
     {
-        
+        rooms = FindObjectsByType<Room>(FindObjectsSortMode.None).ToList();
+        foreach(Room room in rooms)
+        {
+            room.roomManager = this;
+        }
+
+        health = FindFirstObjectByType<HouseHealth>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        currentTime += Time.deltaTime;
+        if(currentTime >= damageTickRate)
+        {
+            currentTime = 0;
+            health.TakeDamage(damagePreFire * totalFire);
+        }
     }
 
-    
+    public void RemoveTotalFire()
+    {
+        totalFire--;
+    }
+
+    public void AddTotalFire()
+    {
+        totalFire++;
+    }
 }

@@ -5,11 +5,14 @@ using UnityEngine;
 /// </summary>
 public class Fire : Enemy
 {
-
+    public Room room;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     protected override void Start()
     {
+        // get room 
+        room = GetComponentInParent<Room>();
+
         // Initialize position of itself. In case of fire it will never be updated again.
         position = transform.position;
     }
@@ -17,6 +20,14 @@ public class Fire : Enemy
     // Update is called once per frame
     protected override void Update()
     {
-        
+        base.Update();
+    }
+
+    protected override void Death()
+    {
+        state = EnemyState.Dead;
+        gameObject.SetActive(false);
+
+        room.RemoveFire();
     }
 }
