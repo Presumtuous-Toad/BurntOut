@@ -256,8 +256,9 @@ public class FireMonster : Enemy
 
             if(currentRoom != null)
             {
-                if (firePrefab != null /*&& !currentRoom.IsMaxFiresReached()*/)     // max fire not done yet
+                if (firePrefab != null && !currentRoom.IsMaxFiresReached())    
                 {
+                    // spawn fire as child of room 
                     Instantiate(firePrefab, spawnPos, Quaternion.identity, currentRoom.transform);
                     currentRoom.AddFire();
                 }
