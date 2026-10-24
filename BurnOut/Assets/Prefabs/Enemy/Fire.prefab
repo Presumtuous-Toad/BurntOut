@@ -134,6 +134,14 @@ MonoBehaviour:
   <timeSinceDmg>k__BackingField: 0
   <Health>k__BackingField: 1
   room: {fileID: 0}
+  FirePrefab: {fileID: 8314636697169942334, guid: 11c5b60aa6bca9b41a9ae52411ac1099, type: 3}
+  MaxChildFires: 3
+  SpawnRate: 15
+  SpawnRaidus: 1.8
+  SafetyRaius: 1.5
+  layerMask:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!1001 &7057441169051160516
 PrefabInstance:
   m_ObjectHideFlags: 0

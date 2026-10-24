@@ -54,6 +54,12 @@ public class FireGrowth : MonoBehaviour
                 isComplete = true;
             }
         }
+        else
+        {
+            // disable script are fully size
+            // can remove isComplete and move this but keeping for now
+            this.enabled = false;
+        }
     }
 
     private void UpdateColliderRadius(float t)
