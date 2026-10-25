@@ -20744,9 +20744,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Room
   wallInset: 3
+  roomManager: {fileID: 0}
   roomColliders:
   - {fileID: 437499396}
   fireMonsters: []
+  fires: 0
+  MaxFires: 0
 --- !u!43 &438902184
 Mesh:
   m_ObjectHideFlags: 0
@@ -46580,10 +46583,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Room
   wallInset: 3
+  roomManager: {fileID: 0}
   roomColliders:
   - {fileID: 812633202}
   fireMonsters:
   - {fileID: 1211870065}
+  fires: 0
+  MaxFires: 0
 --- !u!43 &814800705
 Mesh:
   m_ObjectHideFlags: 0
@@ -72159,10 +72165,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Room
   wallInset: 3
+  roomManager: {fileID: 0}
   roomColliders:
   - {fileID: 1185389891}
   fireMonsters:
   - {fileID: 171606357}
+  fires: 0
+  MaxFires: 0
 --- !u!43 &1186318258
 Mesh:
   m_ObjectHideFlags: 0
@@ -82188,10 +82197,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Room
   wallInset: 3
+  roomManager: {fileID: 0}
   roomColliders:
   - {fileID: 1323012498}
   fireMonsters:
   - {fileID: 960032873}
+  fires: 0
+  MaxFires: 0
 --- !u!1001 &1326650027
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -89137,7 +89149,8 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1145509463}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 2078701473279057700, guid: 122339c2e305e7348924edef07526c0f, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 122339c2e305e7348924edef07526c0f, type: 3}
@@ -112950,9 +112963,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Room
   wallInset: 3
+  roomManager: {fileID: 0}
   roomColliders:
   - {fileID: 1769473166}
   fireMonsters: []
+  fires: 0
+  MaxFires: 0
 --- !u!43 &1769955848
 Mesh:
   m_ObjectHideFlags: 0
@@ -117814,9 +117830,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Room
   wallInset: 3
+  roomManager: {fileID: 0}
   roomColliders:
   - {fileID: 1856588380}
   fireMonsters: []
+  fires: 0
+  MaxFires: 0
 --- !u!43 &1857641604
 Mesh:
   m_ObjectHideFlags: 0
@@ -129398,9 +129417,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Room
   wallInset: 3
+  roomManager: {fileID: 0}
   roomColliders:
   - {fileID: 2055349154}
   fireMonsters: []
+  fires: 0
+  MaxFires: 0
 --- !u!1001 &2056056003
 PrefabInstance:
   m_ObjectHideFlags: 0
