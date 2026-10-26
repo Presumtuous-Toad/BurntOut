@@ -21,7 +21,7 @@ public class ParticleDamager : MonoBehaviour
         {
             print("Particle Hit " + other.name);
             Enemy enemyRef = other.GetComponent<Enemy>();
-            enemyRef.TakeDamage(1);
+            enemyRef.TakeDamage(1);   
         }
     }
 }
