@@ -89482,7 +89482,7 @@ PrefabInstance:
       objectReference: {fileID: 954999707}
     - target: {fileID: 3636456814526649674, guid: 122339c2e305e7348924edef07526c0f, type: 3}
       propertyPath: maxAmmo
-      value: 100000000
+      value: 100
       objectReference: {fileID: 0}
     - target: {fileID: 3636456814526649674, guid: 122339c2e305e7348924edef07526c0f, type: 3}
       propertyPath: ammoSlider

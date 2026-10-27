@@ -31,13 +31,16 @@ public class Fire : Enemy
     // Update is called once per frame
     protected override void Update()
     {
-        if(!stopSapwning)
+        if (room != null)
         {
-            timeElapsed += Time.deltaTime;
-            if (timeElapsed >= SpawnRate)
+            if (!stopSapwning && !room.IsMaxFiresReached())
             {
-                timeElapsed = 0;
-                SpawnFire();
+                timeElapsed += Time.deltaTime;
+                if (timeElapsed >= SpawnRate)
+                {
+                    timeElapsed = 0;
+                    SpawnFire();
+                }
             }
         }
 
@@ -69,7 +72,7 @@ public class Fire : Enemy
             if (Physics.CheckSphere(spawnPos, SafetyRaius, layerMask))
             {
                 // spawn fire and end early
-                if (room != null) Instantiate(FirePrefab, spawnPos, Quaternion.identity, room.transform);
+                Instantiate(FirePrefab, spawnPos, Quaternion.identity, room.transform);
                 room.AddFire();
                 childFires++;
                 if (childFires == MaxChildFires) stopSapwning = true;
