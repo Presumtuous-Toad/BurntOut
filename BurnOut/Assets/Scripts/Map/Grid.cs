@@ -95,25 +95,25 @@ public class Grid : MonoBehaviour
     }
 
     public List<Node> path;     // Temporary - for testing reasons
-    void OnDrawGizmos()
-    {
-        Gizmos.DrawWireCube(transform.position, new Vector3(gridWorldSize.x, 1, gridWorldSize.y));
+    //void OnDrawGizmos()
+    //{
+    //    Gizmos.DrawWireCube(transform.position, new Vector3(gridWorldSize.x, 1, gridWorldSize.y));
 
-        if(grid != null)
-        {
-            // Convert path to HashSet for instant O(1) lookup instead of laggy O(N)
-            HashSet<Node> pathSet = (path != null) ? new HashSet<Node>(path) : null;
+    //    if(grid != null)
+    //    {
+    //        // Convert path to HashSet for instant O(1) lookup instead of laggy O(N)
+    //        HashSet<Node> pathSet = (path != null) ? new HashSet<Node>(path) : null;
 
-            foreach (Node node in grid)
-            {
-                Gizmos.color = (node.walkable)? Color.white : Color.red;
-                if(path != null)
-                {
-                    if(pathSet != null && pathSet.Contains(node))
-                    Gizmos.color = Color.black;
-                }
-                Gizmos.DrawCube(node.worldPosition, Vector3.one * (nodeDiameter - 0.1f));
-            }
-        }
-    }
+    //        foreach (Node node in grid)
+    //        {
+    //            Gizmos.color = (node.walkable)? Color.white : Color.red;
+    //            if(path != null)
+    //            {
+    //                if(pathSet != null && pathSet.Contains(node))
+    //                Gizmos.color = Color.black;
+    //            }
+    //            Gizmos.DrawCube(node.worldPosition, Vector3.one * (nodeDiameter - 0.1f));
+    //        }
+    //    }
+    //}
 }
