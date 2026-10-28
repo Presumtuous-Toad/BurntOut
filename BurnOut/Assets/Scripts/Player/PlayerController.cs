@@ -3,7 +3,10 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] private float speed;
+
+    [SerializeField] private float normalSpeed;
+    [SerializeField] private float encumberedSpeed;
+    private float speed;
     [SerializeField] private LayerMask layerMask;
 
     private Camera cam;
@@ -23,9 +26,23 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
+    
+        if (FireHydrant.isHydrantPickedUp)
+        {
+            speed = encumberedSpeed;
+        }
+        else
+        {
+            speed = normalSpeed;
+        }
+            // move rigidbody 
+            float deltaTime = Time.fixedDeltaTime;
+        Vector3 position = gameObject.transform.position;
+
         // rotate 
         Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
         RaycastHit hit;
+
 
         if (Physics.Raycast(ray, out hit, 100f, layerMask))
         {
