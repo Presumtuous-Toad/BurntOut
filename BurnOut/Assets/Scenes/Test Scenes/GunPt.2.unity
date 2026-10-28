@@ -84370,17 +84370,13 @@ PrefabInstance:
       propertyPath: CurrentHydrant
       value: 
       objectReference: {fileID: 531472792}
-    - target: {fileID: 2143306595856676950, guid: 122339c2e305e7348924edef07526c0f, type: 3}
-      propertyPath: CurrentHydrant
-      value: 
-      objectReference: {fileID: 531472792}
     - target: {fileID: 7173622043332317989, guid: 122339c2e305e7348924edef07526c0f, type: 3}
       propertyPath: m_Name
       value: Player (1)
       objectReference: {fileID: 0}
     - target: {fileID: 8311906533265030818, guid: 122339c2e305e7348924edef07526c0f, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 2
+      value: -5.3
       objectReference: {fileID: 0}
     - target: {fileID: 8311906533265030818, guid: 122339c2e305e7348924edef07526c0f, type: 3}
       propertyPath: m_LocalPosition.y
@@ -84388,7 +84384,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8311906533265030818, guid: 122339c2e305e7348924edef07526c0f, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.76
+      value: -6.1
       objectReference: {fileID: 0}
     - target: {fileID: 8311906533265030818, guid: 122339c2e305e7348924edef07526c0f, type: 3}
       propertyPath: m_LocalRotation.w
