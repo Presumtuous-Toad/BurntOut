@@ -15,7 +15,7 @@ public class FireMonster : Enemy
     public float waypointThreshold = 0.2f;
 
     private PathFinding pathFinding;
-    private List<Vector3> currentPath = new List<Vector3>();    // Current path from enemy to player (Only active when player spotted)
+    private List<Vector3> currentPath = new List<Vector3>();    // Current path from enemy to player (Only active when player spotted | Used in chase sequence)
     private int currentWaypointIndex = 0;
 
     private float timer;
@@ -38,9 +38,9 @@ public class FireMonster : Enemy
         Line    // Enemy patrols in a line
     }
 
-    public PatrolOption currentPatrolOption;
-
-    private List<Vector3> patrolPoints = new List<Vector3>();
+    public PatrolOption currentPatrolOption;    // Represents current monster patrol option. Usage when monster path is generated
+    public int patrolOptionID;                  // Monster holds this info so when deregistering(leaving room), other monster can use this patrol option.
+    public List<Vector3> patrolPoints = new List<Vector3>();
     private int currentPatrolIndex = 0;
 
     public enum MonsterBehavior

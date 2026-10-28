@@ -14,6 +14,7 @@ public class RoomManager : MonoBehaviour
     public float damageTickRate = 5f;
     private float currentTime;
     public int totalFire;
+    
     private void Awake()
     {
         rooms = FindObjectsByType<Room>(FindObjectsSortMode.None).ToList();

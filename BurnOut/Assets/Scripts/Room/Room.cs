@@ -3,11 +3,34 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine.AI;
 
+// Struct to store room patrol points with name 
+[System.Serializable]
+public struct PresetPatrolData
+{
+    public int ID;  // This will be given to monster when in use and returned when not in use.
+
+    [Header("One set of preset points should have at least 2 elements.")]
+    public GameObject[] presetPoints;
+
+    public bool beingUsed;      // Default is not being used but when a monster claims this patrol data, it checks as true, ensuring monsters don't choose the same patrol path
+}
+
 /// <summary>
 /// Every room should have a Room object holding this script with the collider adjusted to its width & height
 /// </summary>
 public class Room : MonoBehaviour
 {
+    [System.Serializable]
+    public enum PatrolPoints
+    {
+        Generate,
+        Preset
+    }
+
+    public PatrolPoints option;
+
+    public List<PresetPatrolData> presetPatrolChoices;
+
     public float wallInset = 2.5f;
     public RoomManager roomManager;
 
@@ -27,11 +50,20 @@ public class Room : MonoBehaviour
 
     // Event that is triggered when monster enters room - might not be needed
 
-    // NOT IMPLEMENTED
     // Number of fire instances in each room. 
     public int fires;
     public int MaxFires;   // Depends on room size. If number of fire reaches the amount of max fire, add behavior to move monster to another room.
 
+    public bool Accessibility;
+
+    // TODO: Event to trigger Maximum Fire --> Room inaccessible and alert monster to go out if they are inside (Drive them oustide)
+    // Room layer -> Unwalkable | Room Not accessible
+    public delegate void WhenRoomInaccessible();
+    public event WhenRoomInaccessible RoomInaccessible;
+
+    // TODO: Event to trigger when amount of fire is under maximum fire --> Room accessible again 
+    public delegate void WhenRoomAccessible();
+    public event WhenRoomAccessible  RoomAccessible;
 
     void Awake()
     {
@@ -61,6 +93,10 @@ public class Room : MonoBehaviour
         {
             Debug.LogError($"{gameObject.name} has no trigger colliders attached!");
         }
+
+        // Subscribe to events
+        RoomAccessible += RoomAccessibilityUpdate;
+        RoomInaccessible += RoomAccessibilityUpdate;
     }
 
     void Start()
@@ -78,7 +114,7 @@ public class Room : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+         
     }
 
     void OnTriggerEnter(Collider other)
@@ -89,6 +125,7 @@ public class Room : MonoBehaviour
             foreach (FireMonster monster in fireMonsters)
             {
                 monster.SetBehavior(FireMonster.MonsterBehavior.Chase);    // Update enemy state
+                                                                           // Give Enemy player position and make them turn towards(look towards) player 
             }
         }
 
@@ -125,7 +162,7 @@ public class Room : MonoBehaviour
 
         if (IsMaxFiresReached())
         {
-            OnMaxFiresReached();
+            RoomInaccessible.Invoke();  // Method to make and subscribe - monster chooses the closest room without fire and moves towards the center of that room(pathfinding)
         }
     }
 
@@ -136,6 +173,11 @@ public class Room : MonoBehaviour
             fires--;
             roomManager.RemoveTotalFire();
         }
+
+        if(!IsMaxFiresReached())
+        {
+            RoomAccessible.Invoke();
+        }
     }
 
     public bool IsMaxFiresReached()
@@ -143,10 +185,49 @@ public class Room : MonoBehaviour
         return fires >= MaxFires;
     }
 
-    private void OnMaxFiresReached()
+    private void RoomAccessibilityUpdate()
     {
-        // Move Monsters to adjacent room or any other behavior
+        Accessibility = !Accessibility;
     }
+
+    /// <summary>
+    /// Sets monster's patrol point list to a list of preset patrol points if it is not being used. 
+    //  Assumes each given patrol point set will contain more than 1 patrol points.
+    /// </summary>
+    public void ReservePresetPatrolPoints(FireMonster monster)
+    {
+        PresetPatrolData data;
+
+        // Choose first option that is not being used
+        for(int i = 0; i < presetPatrolChoices.Count; i++)
+        {
+            if(!presetPatrolChoices[i].beingUsed)
+            {
+                data = presetPatrolChoices[i];
+                data.beingUsed = true;
+                presetPatrolChoices[i] = data;
+                continue;
+            }
+        }
+
+        // Assign patrol data ID to monster
+        monster.patrolOptionID = data.ID;
+
+        // Populate List of vector to return
+        List<Vector3> result = new List<Vector3>();
+
+        if(data.presetPoints != null && data.presetPoints.Length > 1)
+        {
+            for(int i = 0; i < data.presetPoints.Length; i++)
+            {
+                result.Add(data.presetPoints[i].transform.position);
+            }
+        }
+        
+        // Give found data to monster
+        monster.patrolPoints = result;
+    }
+
 
     /// <summary>
     /// Returns a list of patrol points that forms a square. Allow Jitter to ensure not all enemies have the same path
