@@ -65385,19 +65385,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c0529afb147d9c94d99e9af3bd2f6ca4, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.68531007
+      value: 0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c0529afb147d9c94d99e9af3bd2f6ca4, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c0529afb147d9c94d99e9af3bd2f6ca4, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.72825146
+      value: 0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c0529afb147d9c94d99e9af3bd2f6ca4, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c0529afb147d9c94d99e9af3bd2f6ca4, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -65405,7 +65405,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c0529afb147d9c94d99e9af3bd2f6ca4, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: -93.48
+      value: 90
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c0529afb147d9c94d99e9af3bd2f6ca4, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
@@ -89552,6 +89552,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 789335074507767610, guid: 122339c2e305e7348924edef07526c0f, type: 3}
+      propertyPath: layerMask.m_Bits
+      value: 8
+      objectReference: {fileID: 0}
     - target: {fileID: 1157531551716352697, guid: 122339c2e305e7348924edef07526c0f, type: 3}
       propertyPath: healthBar
       value: 
@@ -89572,13 +89576,29 @@ PrefabInstance:
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 533908214}
+    - target: {fileID: 4058440852035816272, guid: 122339c2e305e7348924edef07526c0f, type: 3}
+      propertyPath: m_Constraints
+      value: 80
+      objectReference: {fileID: 0}
     - target: {fileID: 4735559273492527421, guid: 122339c2e305e7348924edef07526c0f, type: 3}
       propertyPath: m_Mesh
       value: 
       objectReference: {fileID: 533908214}
     - target: {fileID: 4735559273492527421, guid: 122339c2e305e7348924edef07526c0f, type: 3}
       propertyPath: m_VersionIndex
-      value: 2873
+      value: 2879
+      objectReference: {fileID: 0}
+    - target: {fileID: 5402375221337034428, guid: 122339c2e305e7348924edef07526c0f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5402375221337034428, guid: 122339c2e305e7348924edef07526c0f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5402375221337034428, guid: 122339c2e305e7348924edef07526c0f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -180
       objectReference: {fileID: 0}
     - target: {fileID: 6665396313624149053, guid: 122339c2e305e7348924edef07526c0f, type: 3}
       propertyPath: m_Enabled
@@ -126193,7 +126213,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Cinemachine::Cinemachine.CinemachineTargetGroup
   m_PositionMode: 1
-  m_RotationMode: 1
+  m_RotationMode: 0
   m_UpdateMethod: 2
   m_Targets:
   - target: {fileID: 2018987056}

@@ -44,10 +44,11 @@ public class GunController : MonoBehaviour
             Vector3 targetPoint = ray.GetPoint(rayDistance);
             Vector3 lookDirection = targetPoint - transform.position;
             lookDirection.y = 0;
-            if (lookDirection != Vector3.zero)
-            {
-                transform.rotation = Quaternion.LookRotation(-lookDirection);
-            }
+            // removed because player now rotates
+            //if (lookDirection != Vector3.zero)
+            //{
+            //    transform.rotation = Quaternion.LookRotation(-lookDirection);
+            //}
         }
         if(firing)
         {
