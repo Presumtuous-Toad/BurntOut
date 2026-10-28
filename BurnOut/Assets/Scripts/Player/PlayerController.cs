@@ -35,8 +35,9 @@ public class PlayerController : MonoBehaviour
         {
             speed = normalSpeed;
         }
-            // move rigidbody 
-            float deltaTime = Time.fixedDeltaTime;
+
+        // move rigidbody 
+        float deltaTime = Time.fixedDeltaTime;
         Vector3 position = gameObject.transform.position;
 
         // rotate 
@@ -60,9 +61,6 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // move rigidbody 
-        float deltaTime = Time.fixedDeltaTime;
-        Vector3 position = gameObject.transform.position;
 
         velocity = direction.normalized * speed;
         position += velocity * deltaTime;

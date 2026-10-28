@@ -6,6 +6,7 @@ public class FireHydrant : MonoBehaviour
     //[SerializeField] private GameObject HydrantPrefab;
     [SerializeField] private GameObject CurrentHydrant;
     [SerializeField] private GameObject BackHydrant;
+    [SerializeField] private GameObject Gun;
     [SerializeField] InputActionReference pickupRef;
     public static bool isHydrantPickedUp { get; private set; }
     public static bool inHydrantRange { get; private set; }
@@ -31,11 +32,11 @@ public class FireHydrant : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.CompareTag("ReloadArea")) inHydrantRange = true;
+        if (other.CompareTag("ReloadArea")) inHydrantRange = true;
     }
     private void OnTriggerExit(Collider other)
     {
-        if(other.CompareTag("ReloadArea")) inHydrantRange= false;
+        if (other.CompareTag("ReloadArea")) inHydrantRange = false;
     }
 
     private void PickupHydrant(InputAction.CallbackContext context)
@@ -44,6 +45,7 @@ public class FireHydrant : MonoBehaviour
         {
             CurrentHydrant.gameObject.SetActive(false);
             BackHydrant.gameObject.SetActive(true);
+            Gun.SetActive(false);
             isHydrantPickedUp = true;
             inHydrantRange = false;
             //change interact subscription to attempt place
@@ -57,7 +59,8 @@ public class FireHydrant : MonoBehaviour
         CurrentHydrant.gameObject.SetActive(true);
         CurrentHydrant.transform.position = new Vector3(BackHydrant.transform.position.x, 0, BackHydrant.transform.position.z);
         BackHydrant.gameObject.SetActive(false);
-        
+        Gun.SetActive(true);
+
         isHydrantPickedUp = false;
         pickupRef.action.performed -= PlaceHydrant;
         pickupRef.action.performed += PickupHydrant;

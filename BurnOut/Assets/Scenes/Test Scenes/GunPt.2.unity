@@ -84366,6 +84366,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1467729388979361502, guid: 122339c2e305e7348924edef07526c0f, type: 3}
+      propertyPath: CurrentHydrant
+      value: 
+      objectReference: {fileID: 531472792}
     - target: {fileID: 2143306595856676950, guid: 122339c2e305e7348924edef07526c0f, type: 3}
       propertyPath: CurrentHydrant
       value: 
