@@ -3,7 +3,9 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] private float speed;
+    [SerializeField] private float normalSpeed;
+    [SerializeField] private float encumberedSpeed;
+    private float speed;
 
     private Rigidbody rb;
     private Vector3 direction;
@@ -24,8 +26,16 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        // move rigidbody 
-        float deltaTime = Time.fixedDeltaTime;
+        if (FireHydrant.isHydrantPickedUp)
+        {
+            speed = encumberedSpeed;
+        }
+        else
+        {
+            speed = normalSpeed;
+        }
+            // move rigidbody 
+            float deltaTime = Time.fixedDeltaTime;
         Vector3 position = gameObject.transform.position;
 
         if(direction == Vector3.zero)

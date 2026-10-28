@@ -64,7 +64,7 @@ public class GunController : MonoBehaviour
 
     private void OnHoseStarted(InputAction.CallbackContext context)
     {
-        if (!hose.isPlaying && ammo > 0 && !reloading)
+        if (!hose.isPlaying && ammo > 0 && !reloading && !FireHydrant.isHydrantPickedUp)
         {
             firing = true;
             hose.Play();
@@ -79,7 +79,7 @@ public class GunController : MonoBehaviour
 
     private void OnReaoad(InputAction.CallbackContext context)
     {
-        if (!reloading)
+        if (!reloading && FireHydrant.inHydrantRange && !FireHydrant.isHydrantPickedUp) 
         {            
             reloading = true;
             ReloadBar.reload();
