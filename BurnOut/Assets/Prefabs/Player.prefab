@@ -180,7 +180,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 079d632bdc63fc749b43b2d710ebc62b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
-  maxHealth: 200
+  maxHealth: 125
   healthBar: {fileID: 0}
 --- !u!1 &4336598123606345555
 GameObject:
@@ -5480,9 +5480,9 @@ MonoBehaviour:
   hose: {fileID: 4784893744474639701}
   attackAction: {fileID: 1120369429361536294, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   reloadAction: {fileID: 4721794807574722876, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  maxAmmo: 100
+  maxAmmo: 300
   <ammo>k__BackingField: 0
-  reloadSpeed: 2
+  reloadSpeed: 1.5
   ReloadBar: {fileID: 6295752159868001509}
   ammoSlider: {fileID: 0}
 --- !u!54 &8834330975813311626

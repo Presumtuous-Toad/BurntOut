@@ -4538,7 +4538,7 @@ MonoBehaviour:
   - {fileID: 66364856}
   fireMonsters: []
   fires: 0
-  MaxFires: 20
+  MaxFires: 10
   Accessibility: 0
 --- !u!1001 &73200325
 PrefabInstance:
@@ -7186,20 +7186,28 @@ PrefabInstance:
       value: Fire Monster
       objectReference: {fileID: 0}
     - target: {fileID: 5253152187513202408, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
+      propertyPath: damage
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 5253152187513202408, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
       propertyPath: player
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1730405009}
     - target: {fileID: 5253152187513202408, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
       propertyPath: currentRoom
       value: 
       objectReference: {fileID: 1532679868}
     - target: {fileID: 5253152187513202408, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
+      propertyPath: dealDamageCooldown
+      value: 0.08
+      objectReference: {fileID: 0}
+    - target: {fileID: 5253152187513202408, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
       propertyPath: <Health>k__BackingField
-      value: 5
+      value: 40
       objectReference: {fileID: 0}
     - target: {fileID: 5253152187513202408, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
       propertyPath: <dmgCooldown>k__BackingField
-      value: 0.5
+      value: 0.02
       objectReference: {fileID: 0}
     - target: {fileID: 7141243612180198416, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
       propertyPath: m_LocalScale.y
@@ -43945,13 +43953,29 @@ PrefabInstance:
       value: Fire Monster (2)
       objectReference: {fileID: 0}
     - target: {fileID: 5253152187513202408, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
+      propertyPath: damage
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 5253152187513202408, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
       propertyPath: player
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1730405009}
     - target: {fileID: 5253152187513202408, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
       propertyPath: currentRoom
       value: 
       objectReference: {fileID: 1177714957}
+    - target: {fileID: 5253152187513202408, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
+      propertyPath: dealDamageCooldown
+      value: 0.08
+      objectReference: {fileID: 0}
+    - target: {fileID: 5253152187513202408, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
+      propertyPath: <Health>k__BackingField
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 5253152187513202408, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
+      propertyPath: <dmgCooldown>k__BackingField
+      value: 0.02
+      objectReference: {fileID: 0}
     - target: {fileID: 7141243612180198416, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
       propertyPath: m_LocalScale.y
       value: 2.5864
@@ -48788,7 +48812,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoomManager
   damagePreFire: 1
-  damageTickRate: 5
+  damageTickRate: 1
   totalFire: 0
 --- !u!1001 &1108918395
 PrefabInstance:
@@ -50961,7 +50985,7 @@ MonoBehaviour:
   fireMonsters:
   - {fileID: 2069499755}
   fires: 0
-  MaxFires: 20
+  MaxFires: 30
   Accessibility: 0
 --- !u!43 &1148368785
 Mesh:
@@ -52353,7 +52377,7 @@ MonoBehaviour:
   fireMonsters:
   - {fileID: 2140584490}
   fires: 0
-  MaxFires: 20
+  MaxFires: 40
   Accessibility: 0
 --- !u!1001 &1180822199
 PrefabInstance:
@@ -66133,7 +66157,7 @@ MonoBehaviour:
   fireMonsters:
   - {fileID: 1023407574}
   fires: 0
-  MaxFires: 20
+  MaxFires: 50
   Accessibility: 0
 --- !u!1001 &1534233370
 PrefabInstance:
@@ -76847,13 +76871,29 @@ PrefabInstance:
       value: Fire Monster (1)
       objectReference: {fileID: 0}
     - target: {fileID: 5253152187513202408, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
+      propertyPath: damage
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 5253152187513202408, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
       propertyPath: player
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1730405009}
     - target: {fileID: 5253152187513202408, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
       propertyPath: currentRoom
       value: 
       objectReference: {fileID: 1142781557}
+    - target: {fileID: 5253152187513202408, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
+      propertyPath: dealDamageCooldown
+      value: 0.08
+      objectReference: {fileID: 0}
+    - target: {fileID: 5253152187513202408, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
+      propertyPath: <Health>k__BackingField
+      value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 5253152187513202408, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
+      propertyPath: <dmgCooldown>k__BackingField
+      value: 0.02
+      objectReference: {fileID: 0}
     - target: {fileID: 7141243612180198416, guid: fa6cd68fa0c1c4514b7654e1a06a90f3, type: 3}
       propertyPath: m_LocalScale.y
       value: 2.8505
@@ -77460,7 +77500,7 @@ MonoBehaviour:
   - {fileID: 1756063327}
   fireMonsters: []
   fires: 0
-  MaxFires: 20
+  MaxFires: 15
   Accessibility: 0
 --- !u!1 &1759406234
 GameObject:

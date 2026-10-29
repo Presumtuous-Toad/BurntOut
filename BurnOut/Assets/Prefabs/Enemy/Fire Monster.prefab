@@ -127,12 +127,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FireMonster
   position: {x: 0, y: 0, z: 0}
-  damage: 5
-  dealDamageCooldown: 0.2
+  damage: 15
+  dealDamageCooldown: 0.03
   state: 0
   <dmgCooldown>k__BackingField: 0
   <timeSinceDmg>k__BackingField: 0
-  <Health>k__BackingField: 0
+  <Health>k__BackingField: 20
   moveSpeed: 3
   chasePathUpdateInterval: 0.25
   waypointThreshold: 0.2

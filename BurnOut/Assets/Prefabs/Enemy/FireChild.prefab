@@ -114,7 +114,7 @@ SphereCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Radius: 0.85
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Center: {x: 0, y: 0.4, z: 0}
 --- !u!114 &7186765094206567099
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -133,16 +133,17 @@ MonoBehaviour:
   state: 0
   <dmgCooldown>k__BackingField: 0
   <timeSinceDmg>k__BackingField: 0
-  <Health>k__BackingField: 1
+  <Health>k__BackingField: 10
   room: {fileID: 0}
   FirePrefab: {fileID: 8314636697169942334, guid: 82b98e9b5f6dce448a61baa923c2e53a, type: 3}
   MaxChildFires: 3
-  SpawnRate: 15
-  SpawnRaidus: 1.8
-  SafetyRaius: 1.5
+  MaxSpawnRate: 6
+  MinSpawnRate: 4
+  SpawnRaidus: 2.5
+  SafetyRaius: 1.25
   layerMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 576
 --- !u!54 &-4773648722674175013
 Rigidbody:
   m_ObjectHideFlags: 0
