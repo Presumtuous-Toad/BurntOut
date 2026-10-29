@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class HouseHealth : MonoBehaviour, IDamageable
@@ -31,6 +32,6 @@ public class HouseHealth : MonoBehaviour, IDamageable
 
     public void Death()
     {
-        // TO DO: Load Death canvas, start menu, etc 
+        SceneManager.LoadScene(2);
     }
 }
