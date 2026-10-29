@@ -22027,6 +22027,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f04cb26b5c1684622a026fd5b9519a09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Room
+  option: 0
+  presetPatrolChoices: []
   wallInset: 3
   roomManager: {fileID: 0}
   roomColliders:
@@ -22034,6 +22036,7 @@ MonoBehaviour:
   fireMonsters: []
   fires: 0
   MaxFires: 20
+  Accessibility: 0
 --- !u!43 &438902184
 Mesh:
   m_ObjectHideFlags: 0
@@ -47332,6 +47335,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f04cb26b5c1684622a026fd5b9519a09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Room
+  option: 0
+  presetPatrolChoices: []
   wallInset: 3
   roomManager: {fileID: 0}
   roomColliders:
@@ -47340,6 +47345,7 @@ MonoBehaviour:
   - {fileID: 1211870065}
   fires: 0
   MaxFires: 20
+  Accessibility: 0
 --- !u!43 &814800705
 Mesh:
   m_ObjectHideFlags: 0
@@ -72358,6 +72364,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f04cb26b5c1684622a026fd5b9519a09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Room
+  option: 0
+  presetPatrolChoices: []
   wallInset: 3
   roomManager: {fileID: 0}
   roomColliders:
@@ -72366,6 +72374,7 @@ MonoBehaviour:
   - {fileID: 171606357}
   fires: 0
   MaxFires: 20
+  Accessibility: 0
 --- !u!1001 &1189478499
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -82568,6 +82577,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f04cb26b5c1684622a026fd5b9519a09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Room
+  option: 0
+  presetPatrolChoices: []
   wallInset: 3
   roomManager: {fileID: 0}
   roomColliders:
@@ -82576,6 +82587,7 @@ MonoBehaviour:
   - {fileID: 960032873}
   fires: 0
   MaxFires: 20
+  Accessibility: 0
 --- !u!43 &1324244432
 Mesh:
   m_ObjectHideFlags: 0
@@ -112957,6 +112969,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f04cb26b5c1684622a026fd5b9519a09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Room
+  option: 0
+  presetPatrolChoices: []
   wallInset: 3
   roomManager: {fileID: 0}
   roomColliders:
@@ -112964,6 +112978,7 @@ MonoBehaviour:
   fireMonsters: []
   fires: 0
   MaxFires: 20
+  Accessibility: 0
 --- !u!4 &1771974748 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 103366937895171633, guid: e84ea38bdf4a25d4989af88a9f57f8af, type: 3}
@@ -117112,6 +117127,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f04cb26b5c1684622a026fd5b9519a09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Room
+  option: 0
+  presetPatrolChoices: []
   wallInset: 3
   roomManager: {fileID: 0}
   roomColliders:
@@ -117119,6 +117136,7 @@ MonoBehaviour:
   fireMonsters: []
   fires: 0
   MaxFires: 20
+  Accessibility: 0
 --- !u!43 &1857641604
 Mesh:
   m_ObjectHideFlags: 0
@@ -129767,6 +129785,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f04cb26b5c1684622a026fd5b9519a09, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Room
+  option: 0
+  presetPatrolChoices: []
   wallInset: 3
   roomManager: {fileID: 0}
   roomColliders:
@@ -129774,6 +129794,7 @@ MonoBehaviour:
   fireMonsters: []
   fires: 0
   MaxFires: 20
+  Accessibility: 0
 --- !u!1001 &2056056003
 PrefabInstance:
   m_ObjectHideFlags: 0

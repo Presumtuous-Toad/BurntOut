@@ -1,128 +1,111 @@
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.Rendering;
-using Unity.VisualScripting;
 
-/// <summary>
-/// FireMonster script is attached to FireMonster who spawns fire at certain intervals, 
-/// and chases the player if they can see them at the field of view. 
-/// ** If wanted we can draw the FOV using Unity Gizmos for debugging purposes
-/// </summary>
 public class FireMonster : Enemy
 {
+    [Header("Movement")]
     public float moveSpeed = 3.0f;
-    public float chasePathUpdateInterval = 0.25f; // Calculating new path happens 4 times per second when chasing player.
-    public float waypointThreshold = 0.2f;
+    public float chasePathUpdateInterval = 0.25f;
+    public float waypointThreshold = 0.4f;
 
+    private Rigidbody rb;
     private PathFinding pathFinding;
-    private List<Vector3> currentPath = new List<Vector3>();    // Current path from enemy to player (Only active when player spotted)
+    private List<Vector3> currentPath = new List<Vector3>();
     private int currentWaypointIndex = 0;
-
-    private float timer;
 
     public Transform player;
     public float viewRadius = 12f;
-    [Range(0, 360)]
-    public float viewAngle = 90f;
-    public LayerMask obstacleMask;         // This might have to change - currently unwalkable = obstacle mask but there could be unwalkable places where it is not an obstacle
-    
-    
-    private bool hasSpottedPlayer = false;
+    [Range(0, 360)] public float viewAngle = 90f;
+    public LayerMask obstacleMask;
+
     private Vector3 lastPlayerLocation = Vector3.zero;
 
-    public Room currentRoom;              // Room that the monster is currently in
-
-    public enum PatrolOption
-    {
-        Loop,   // Enemy patrols in a loop
-        Line    // Enemy patrols in a line
-    }
-
-    public PatrolOption currentPatrolOption;
-
-    private List<Vector3> patrolPoints = new List<Vector3>();
+    [Header("Room & Patrol")]
+    public Room currentRoom;
+    public int patrolOptionID = -1;
+    public List<Vector3> patrolPoints = new List<Vector3>();
     private int currentPatrolIndex = 0;
 
     public enum MonsterBehavior
     {
-        Patrol,     // Picks patrol points whem in a room. 
-        Chase,      // Need to optimize A* for enemy
-        Attack,     // Implemented but currently it is in collision state. I
-                    // if that is true, this might not need to be present.
-        SpawningFire
+        Patrol,
+        Chase,
+        ChangingRoom
     }
-    
-    public MonsterBehavior currentBehavior; // Later will be used for state changes
 
+    public MonsterBehavior currentBehavior;
+
+    [Header("Fire Spawning")]
     public GameObject firePrefab;
-    public float spawnFireEveryDistance = 3.0f;   
-    public float fireOffsetDistance = 1.2f;
-    public float pauseAndSpawnDuration = 1.0f;  // Pause Duration
+    public float spawnFireEveryDistance = 2.5f; // Drop 1 fire every X units
     private Vector3 lastFireSpawnPosition;
-    private bool isSpawningFire = false;
 
+    [Header("Patrol Pause Settings")]
+    public float loopPauseDuration = 2.0f; // Pause duration after completing 1 full loop
+    private float pauseTimer = 0f;
+    private bool isPausingBetweenLoops = false;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     protected override void Start()
     {
         base.Start();
-        // Just in case the parent 3D object is misaligned with the component
+
         foreach (Transform child in transform)
         {
             child.localRotation = Quaternion.identity;
         }
 
-        pathFinding = FindFirstObjectByType<PathFinding>(); 
-    
-        if (pathFinding == null)
+        rb = GetComponent<Rigidbody>();
+        if (rb != null)
         {
-            Debug.LogError("No PathFinding script found in the scene!");
-            return;
+            rb.isKinematic = true;
+        }
+        else
+        {
+            Debug.LogError($"[FireMonster] {gameObject.name} is missing a Rigidbody component!");
         }
 
-        // Current Position and Current Behavior
-        position = transform.position;
+        pathFinding = FindFirstObjectByType<PathFinding>();
         lastFireSpawnPosition = transform.position;
-        currentBehavior = MonsterBehavior.Patrol;
+
+        SetBehavior(MonsterBehavior.Patrol);
     }
 
-    // Update is called once per frame
     protected override void Update()
     {
         base.Update();
         timeSinceDmg += Time.deltaTime;
 
-        // Update Monster Behavior
         bool canSee = CanSeePlayer();
 
-        // If monster spots player and is patrolling - start chasing player
         if (canSee && currentBehavior != MonsterBehavior.Chase)
         {
             SetBehavior(MonsterBehavior.Chase);
         }
-        // If monster cannot see player and was chasing - start patrolling again
         else if (!canSee && currentBehavior == MonsterBehavior.Chase)
         {
             SetBehavior(MonsterBehavior.Patrol);
         }
-        
 
-        // Execute specifics in behavior
-        switch(currentBehavior)
+        switch (currentBehavior)
         {
             case MonsterBehavior.Patrol:
                 ProcessPatrolState();
-                FollowPath();
-                CheckMidTransitFireSpawn();     // Check whether it should stop and spawn fire
-            break;
+                break;
 
-            case MonsterBehavior.Chase: 
-                FollowPath();
-            break;
+            case MonsterBehavior.ChangingRoom:
+                CheckRoomTransitionComplete();
+                break;
+        }
 
-            case MonsterBehavior.SpawningFire:
-                // Monster does not move when spawning fires
-            break;
+        // SPAWN FIRE TRAIL IN ALL STATES (Patrol, Chase, ChangingRoom)
+        CheckTrailFireSpawn();
+    }
+
+    void FixedUpdate()
+    {
+        if (currentBehavior == MonsterBehavior.Patrol || currentBehavior == MonsterBehavior.Chase || currentBehavior == MonsterBehavior.ChangingRoom)
+        {
+            FollowPath();
         }
     }
 
@@ -131,168 +114,281 @@ public class FireMonster : Enemy
         currentBehavior = newBehavior;
         CancelInvoke(nameof(UpdateChasePath));
 
-        if(newBehavior == MonsterBehavior.Chase)
+        if (newBehavior == MonsterBehavior.Chase)
         {
-            isSpawningFire = false;
             InvokeRepeating(nameof(UpdateChasePath), 0f, chasePathUpdateInterval);
         }
-        else if(newBehavior == MonsterBehavior.Patrol)
+        else if (newBehavior == MonsterBehavior.Patrol)
         {
-            if(currentRoom != null)
+            InitializePatrolRoute();
+        }
+    }
+
+    private void InitializePatrolRoute()
+    {
+        if (currentRoom == null)
+        {
+            Debug.LogError($"[FireMonster] {gameObject.name} cannot initialize patrol: currentRoom is NULL!");
+            return;
+        }
+
+        // Unsubscribe first to prevent duplicate event subscriptions
+        currentRoom.RoomInaccessible -= HandleRoomInaccessible;
+        currentRoom.RoomInaccessible += HandleRoomInaccessible;
+
+        // Clear existing route if invalid
+        if (patrolPoints == null) patrolPoints = new List<Vector3>();
+
+        if (patrolPoints.Count == 0)
+        {
+            if (currentRoom.option == Room.PatrolPoints.Preset)
             {
-                patrolPoints = (currentPatrolOption == PatrolOption.Loop) ?
-                                currentRoom.GenerateLoopPatrolPoints(pathFinding) : currentRoom.GenerateLinePatrolPoints();
-                currentPatrolIndex = 0;
-                RequestPathTo(patrolPoints[currentPatrolIndex]);
+                bool reserved = currentRoom.ReservePresetPatrolPoints(this);
+
+                // If room preset reservation failed (full or unassigned), evacuate or generate grid loop fallback
+                if (!reserved)
+                {
+                    Debug.LogWarning($"[FireMonster] {gameObject.name} could not reserve preset in {currentRoom.gameObject.name}. Falling back to generated grid loop.");
+                    patrolPoints = currentRoom.GenerateLoopPatrolPoints(pathFinding);
+                    patrolOptionID = -1;
+                }
             }
+            else
+            {
+                patrolPoints = currentRoom.GenerateLoopPatrolPoints(pathFinding);
+                patrolOptionID = -1;
+            }
+        }
+
+        currentPatrolIndex = 0;
+
+        // FORCE initial movement toward point 0
+        if (patrolPoints != null && patrolPoints.Count > 0)
+        {
+            bool success = RequestPathTo(patrolPoints[0]);
+            if (!success)
+            {
+                Debug.LogWarning($"[FireMonster] {gameObject.name} failed initial pathing to patrol point 0. Trying point 1...");
+                ProcessPatrolState(); // Step through to next valid waypoint
+            }
+        }
+    }
+
+    private void HandleRoomInaccessible()
+    {
+        Debug.Log($"[FireMonster] {gameObject.name} received RoomInaccessible event from {currentRoom.gameObject.name}!");
+
+        // Chase mode takes precedence over evacuation
+        if (currentBehavior == MonsterBehavior.Chase) return;
+
+        EvacuateToNextRoom();
+    }
+
+    public void EvacuateToNextRoom()
+    {
+        if (currentRoom == null) return;
+
+        if (currentRoom.roomManager == null)
+        {
+            Debug.LogError($"[FireMonster] {gameObject.name} cannot evacuate: RoomManager reference on {currentRoom.gameObject.name} is missing!");
+            return;
+        }
+
+        Room targetRoom = currentRoom.roomManager.GetClosestAccessibleRoom(transform.position, currentRoom);
+
+        if (targetRoom != null)
+        {
+            Debug.Log($"[FireMonster] {gameObject.name} evacuating from {currentRoom.gameObject.name} to {targetRoom.gameObject.name}.");
+
+            // Release preset in old room
+            if (patrolOptionID != -1)
+            {
+                currentRoom.ReleasePresetPatrolPoints(patrolOptionID);
+                patrolOptionID = -1;
+            }
+
+            currentRoom.RoomInaccessible -= HandleRoomInaccessible;
+            patrolPoints.Clear();
+
+            currentBehavior = MonsterBehavior.ChangingRoom;
+
+            // Path directly to the center of the target room's bounds
+            Vector3 targetCenter = targetRoom.GetComponent<Collider>().bounds.center;
+            targetCenter.y = transform.position.y; // Ensure horizontal plane alignment
+
+            bool pathSuccess = RequestPathTo(targetCenter);
+            if (!pathSuccess)
+            {
+                Debug.LogError($"[FireMonster] {gameObject.name} failed to find path to evac room center {targetCenter}!");
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"[FireMonster] {gameObject.name} could not find any accessible target room to evacuate to!");
+        }
+    }
+
+    void CheckRoomTransitionComplete()
+    {
+        // Once monster arrives at target room center, assign new room and resume patrol
+        if (currentPath == null || currentWaypointIndex >= currentPath.Count)
+        {
+            // Re-detect room standing inside
+            Collider[] hits = Physics.OverlapSphere(transform.position, 1.0f);
+            foreach (var hit in hits)
+            {
+                Room newRoom = hit.GetComponent<Room>();
+                if (newRoom == null) newRoom = hit.GetComponentInParent<Room>();
+
+                if (newRoom != null && newRoom != currentRoom)
+                {
+                    currentRoom = newRoom;
+                    if (!currentRoom.fireMonsters.Contains(this))
+                    {
+                        currentRoom.fireMonsters.Add(this);
+                    }
+                    break;
+                }
+            }
+
+            SetBehavior(MonsterBehavior.Patrol);
         }
     }
 
     void ProcessPatrolState()
     {
-        if (isSpawningFire) return;
-
-            // Trigger when monster has no path or has reached the end of its current path
-            if (currentPath == null || currentPath.Count == 0 || currentWaypointIndex >= currentPath.Count)
+        if (isPausingBetweenLoops)
+        {
+            pauseTimer -= Time.deltaTime;
+            if (pauseTimer <= 0f)
             {
-                // If monster knows last spotted location, try to make patrol there
-                if (lastPlayerLocation != Vector3.zero)
+                isPausingBetweenLoops = false;
+                RequestPathTo(patrolPoints[currentPatrolIndex]);
+            }
+            return;
+        }
+
+        if (currentPath == null || currentPath.Count == 0 || currentWaypointIndex >= currentPath.Count)
+        {
+            // If last player location known generate patrol points around there - this might be taken out.
+            if (lastPlayerLocation != Vector3.zero)
+            {
+                List<Vector3> searchPoints = (currentRoom != null)
+                    ? currentRoom.GenerateSearchPointsAround(lastPlayerLocation, pathFinding)
+                    : null;
+
+                lastPlayerLocation = Vector3.zero;
+
+                if (searchPoints != null && searchPoints.Count > 0)
                 {
-                    Debug.Log($"[FireMonster] Investigating last spotted location: {lastPlayerLocation}");
-
-                    List<Vector3> searchPoints = (currentRoom != null)
-                        ? currentRoom.GenerateSearchPointsAround(lastPlayerLocation, pathFinding)
-                        : null;
-
-                    if (searchPoints != null && searchPoints.Count > 0)
-                    {
-                        patrolPoints = searchPoints;
-                        currentPatrolIndex = 0;
-                        lastPlayerLocation = Vector3.zero; // Clear trigger so it only fires once upon arrival
-                        
-                        if (!RequestPathTo(patrolPoints[currentPatrolIndex]))
-                        {
-                            // Fallback if pathing fails
-                            lastPlayerLocation = Vector3.zero;
-                            patrolPoints.Clear();
-                        }
-                        return;
-                    }
-                    else
-                    {
-                        // Revert to room patrol
-                        lastPlayerLocation = Vector3.zero;
-                    }
-                }
-
-                // Room Patrol loop
-                if (patrolPoints == null || patrolPoints.Count == 0)
-                {
-                    if (currentRoom != null)
-                    {
-                        patrolPoints = (currentPatrolOption == PatrolOption.Loop)
-                            ? currentRoom.GenerateLoopPatrolPoints(pathFinding)
-                            : currentRoom.GenerateLinePatrolPoints();
-
-                        currentPatrolIndex = 0;
-                    }
-                }
-                else
-                {
-                    // Advance to next waypoint index
-                    currentPatrolIndex = (currentPatrolIndex + 1) % patrolPoints.Count;
-                }
-
-                // Request path to active patrol index
-                if (patrolPoints != null && patrolPoints.Count > 0)
-                {
-                    bool pathSuccess = RequestPathTo(patrolPoints[currentPatrolIndex]);
-
-                    // If pathfinding returned null, skip to next index so it doesn't stop moving
-                    if (!pathSuccess)
-                    {
-                        currentPatrolIndex = (currentPatrolIndex + 1) % patrolPoints.Count;
-                    }
+                    patrolPoints = searchPoints;
+                    currentPatrolIndex = 0;
+                    RequestPathTo(patrolPoints[0]);
+                    return;
                 }
             }
+
+            if (patrolPoints != null && patrolPoints.Count > 0)
+            {
+                // If we are at the end of the list, wrap around with pause
+                int nextIndex = (currentPatrolIndex + 1) % patrolPoints.Count;
+
+                if (nextIndex == 0 && currentPath != null && currentPath.Count > 0)
+                {
+                    currentPatrolIndex = 0;
+                    isPausingBetweenLoops = true;
+                    pauseTimer = loopPauseDuration;
+                    currentPath.Clear();
+                    return;
+                }
+
+                currentPatrolIndex = nextIndex;
+                bool success = RequestPathTo(patrolPoints[currentPatrolIndex]);
+
+                // If this point failed pathing (e.g. Y offset or wall snag), 
+                // skip it immediately so the monster doesn't get stuck forever!
+                int safetyCounter = 0;
+                while (!success && safetyCounter < patrolPoints.Count)
+                {
+                    currentPatrolIndex = (currentPatrolIndex + 1) % patrolPoints.Count;
+                    success = RequestPathTo(patrolPoints[currentPatrolIndex]);
+                    safetyCounter++;
+                }
+            }
+        }
     }
 
     /// <summary>
-    /// WHEN PATROLLING - Checks distance moved and triggers a pause in movement to spawn fire
+    /// Spawns fire trail continuously during movement regardless of active state
     /// </summary>
-    void CheckMidTransitFireSpawn()
+    void CheckTrailFireSpawn()
     {
-        if(isSpawningFire || currentPath == null || currentPath.Count == 0) return;
+        if (currentRoom == null || firePrefab == null) return;
+
+        // Stop dropping fires if current room is at capacity
+        if (currentRoom.IsMaxFiresReached()) return;
+
+        // Must be actively moving along a path
+        if (currentPath == null || currentPath.Count == 0 || currentWaypointIndex >= currentPath.Count) return;
 
         float distanceMoved = Vector3.Distance(transform.position, lastFireSpawnPosition);
 
-        if(distanceMoved >= spawnFireEveryDistance)
+        if (distanceMoved >= spawnFireEveryDistance)
         {
-            StartCoroutine(SpawnFiresRoutine());
-        }
+            lastFireSpawnPosition = transform.position;
 
-    }
-
-    // If we want more fires to be spawn, this can be supported
-    private System.Collections.IEnumerator SpawnFiresRoutine()
-    {
-        isSpawningFire = true;
-        currentBehavior = MonsterBehavior.SpawningFire;
-        lastFireSpawnPosition = transform.position;
-
-        // 4 locations to spawn fire
-        Vector3[] offsets = new Vector3[]
-        {
-            new Vector3(fireOffsetDistance, 0f, 0f),   // Right
-            new Vector3(-fireOffsetDistance, 0f, 0f),  // Left
-            new Vector3(0f, 0f, fireOffsetDistance),   // Forward
-            new Vector3(0f, 0f, -fireOffsetDistance)   // Back
-        };
-
-        // Instantiate 4 fires & register to current room
-        foreach (Vector3 offset in offsets)
-        {
-            Vector3 spawnPos = transform.position + offset;
-
-            if(currentRoom != null)
-            {
-                if (firePrefab != null && !currentRoom.IsMaxFiresReached())    
-                {
-                    // spawn fire as child of room 
-                    Instantiate(firePrefab, spawnPos, Quaternion.identity, currentRoom.transform);
-                    currentRoom.AddFire();
-                }
-            }
-        }
-
-        // Brief pause before moving again
-        yield return new WaitForSeconds(pauseAndSpawnDuration);
-
-        // Resume patrol if not spotted player during pause
-        if (currentBehavior == MonsterBehavior.SpawningFire)
-        {
-            isSpawningFire = false;
-            currentBehavior = MonsterBehavior.Patrol;
+            Instantiate(firePrefab, transform.position, Quaternion.identity, currentRoom.transform);
+            currentRoom.AddFire();
         }
     }
 
     void UpdateChasePath()
     {
-        if(player != null && CanSeePlayer())
+        if (player != null && CanSeePlayer())
         {
+            lastPlayerLocation = player.position;
             RequestPathTo(player.position);
         }
     }
 
     bool RequestPathTo(Vector3 targetPos)
     {
-        if (pathFinding == null) return false;
+        if (pathFinding == null || pathFinding.grid == null) return false;
 
-        List<Node> rawPath = pathFinding.FindPath(transform.position, targetPos);
+        // Get nodes for start and target
+        Node startNode = pathFinding.grid.NodeFromWorldPoint(transform.position);
+        Node targetNode = pathFinding.grid.NodeFromWorldPoint(targetPos);
+
+        if (startNode == null || targetNode == null)
+        {
+            Debug.LogWarning($"[FireMonster] Out of grid bounds! Start: {startNode != null}, Target: {targetNode != null}");
+            return false;
+        }
+
+        // If start node is unwalkable (e.g. monster spawned inside obstacle layer), find nearest walkable node
+        Vector3 validStartPos = transform.position;
+        if (!startNode.walkable)
+        {
+            Debug.LogWarning($"[FireMonster] Start position {transform.position} is UNWALKABLE! Finding nearest walkable node...");
+            Node nearestStart = GetNearestWalkableNode(startNode);
+            if (nearestStart != null) validStartPos = nearestStart.worldPosition;
+            else return false;
+        }
+
+        Vector3 validTargetPos = targetPos;
+        if (!targetNode.walkable)
+        {
+            Node nearestTarget = GetNearestWalkableNode(targetNode);
+            if (nearestTarget != null) validTargetPos = nearestTarget.worldPosition;
+            else return false;
+        }
+
+        // 3. Find path using validated positions
+        List<Node> rawPath = pathFinding.FindPath(validStartPos, validTargetPos);
 
         if (rawPath == null || rawPath.Count <= 1)
         {
-            return false; // Path failed or target unwalkable
+            return false;
         }
 
         currentPath.Clear();
@@ -302,36 +398,79 @@ public class FireMonster : Enemy
         }
 
         currentWaypointIndex = 0;
-        return true; 
+        return true;
     }
 
     /// <summary>
-    /// Fire Monster follows given path.
+    /// Helper to find the closest walkable node if a start/target point lands inside an obstacle.
     /// </summary>
+    private Node GetNearestWalkableNode(Node originNode)
+    {
+        if (pathFinding == null || pathFinding.grid == null) return null;
+
+        int searchRadius = 3; // Check up to 3 nodes outward
+        Node closestNode = null;
+        float minDistance = float.MaxValue;
+
+        for (int x = -searchRadius; x <= searchRadius; x++)
+        {
+            for (int z = -searchRadius; z <= searchRadius; z++)
+            {
+                int checkX = originNode.gridX + x;
+                int checkZ = originNode.gridY + z;
+
+                if (checkX >= 0 && checkX < pathFinding.grid.gridSizeX && checkZ >= 0 && checkZ < pathFinding.grid.gridSizeY)
+                {
+                    Node neighbor = pathFinding.grid.grid[checkX, checkZ];
+                    if (neighbor.walkable)
+                    {
+                        float dist = Vector3.Distance(originNode.worldPosition, neighbor.worldPosition);
+                        if (dist < minDistance)
+                        {
+                            minDistance = dist;
+                            closestNode = neighbor;
+                        }
+                    }
+                }
+            }
+        }
+
+        return closestNode;
+    }
+
+
     void FollowPath()
     {
         if (currentPath == null || currentPath.Count == 0 || currentWaypointIndex >= currentPath.Count)
-            return;
+        return;
 
-        // Get current target waypoint
+        // Force target waypoint to align perfectly with Rigidbody height
         Vector3 targetPos = currentPath[currentWaypointIndex];
-        targetPos.y = transform.position.y; // Keep Y height locked to ground
+        targetPos.y = rb.position.y;
 
-        Vector3 dirToTarget = targetPos - transform.position;
+        Vector3 currentPos = rb.position;
+        currentPos.y = targetPos.y; // Flatten horizontal plane
 
-        // Only rotate if we are reasonably far from the waypoint center
-        if (dirToTarget.sqrMagnitude > 0.05f)
+        Vector3 dirToTarget = (targetPos - currentPos).normalized;
+
+        // Smooth Rotation
+        if (dirToTarget.sqrMagnitude > 0.001f)
         {
-            Quaternion targetRotation = Quaternion.LookRotation(dirToTarget.normalized, Vector3.up);
-            // Smooth out turning over time
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 10f);
+            Quaternion targetRotation = Quaternion.LookRotation(dirToTarget, Vector3.up);
+            rb.MoveRotation(Quaternion.Slerp(rb.rotation, targetRotation, Time.fixedDeltaTime * 10f));
         }
 
-        // Move forward
-        transform.position = Vector3.MoveTowards(transform.position, targetPos, moveSpeed * Time.deltaTime);
+        // Move Position horizontally
+        Vector3 nextPos = Vector3.MoveTowards(currentPos, targetPos, moveSpeed * Time.fixedDeltaTime);
+        rb.MovePosition(nextPos);
 
-        // Advance to next waypoint when within threshold distance
-        if (Vector3.Distance(transform.position, targetPos) < waypointThreshold)
+        // Horizontal Distance Check (Ignore vertical height variations)
+        float horizontalDistance = Vector3.Distance(
+            new Vector3(rb.position.x, 0f, rb.position.z),
+            new Vector3(targetPos.x, 0f, targetPos.z)
+        );
+
+        if (horizontalDistance < waypointThreshold)
         {
             currentWaypointIndex++;
         }
@@ -339,11 +478,7 @@ public class FireMonster : Enemy
 
     public bool CanSeePlayer()
     {
-        if (player == null) 
-        {
-            Debug.LogWarning("Player reference is NULL!");
-            return false;
-        }
+        if (player == null) return false;
 
         Vector3 origin = transform.position + Vector3.up * 1.0f;
         Vector3 target = player.position + Vector3.up * 1.0f;
@@ -351,29 +486,13 @@ public class FireMonster : Enemy
         Vector3 dirToPlayer = (target - origin).normalized;
         float distToPlayer = Vector3.Distance(origin, target);
 
-        // Distance Check
-        if (distToPlayer > viewRadius)
-        {
-            Debug.Log($"FAIL - Distance too far - Dist: {distToPlayer:F1} / Max: {viewRadius}");
-            return false;
-        }
+        if (distToPlayer > viewRadius) return false;
 
-        // Angle Check
         float angle = Vector3.Angle(transform.forward, dirToPlayer);
-        if (angle > viewAngle / 2f)
-        {
-            Debug.Log($"FAIL - Outside cone! Angle: {angle:F1}° / Max allowed: {viewAngle / 2f}°");
-            return false;
-        }
+        if (angle > viewAngle / 2f) return false;
 
-        // Raycast Obstacle Check
-        if (Physics.Raycast(origin, dirToPlayer, out RaycastHit hit, distToPlayer - 0.1f, obstacleMask))
-        {
-            Debug.Log($"FAIL - Raycast hit obstacle: '{hit.collider.name}' on Layer '{LayerMask.LayerToName(hit.collider.gameObject.layer)}'");
-            return false;
-        }
+        if (Physics.Raycast(origin, dirToPlayer, distToPlayer - 0.1f, obstacleMask)) return false;
 
-        Debug.Log("SUCCESS - Player spotted!");
         return true;
     }
 }

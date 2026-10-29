@@ -3,11 +3,35 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine.AI;
 
+// Struct to store room patrol points with name 
+[System.Serializable]
+public struct PresetPatrolData
+{
+    [Header("MUST be index - cannot assign same index")]
+    public int ID;  // This will be given to monster when in use and returned when not in use.
+
+    [Header("One set of preset points should have at least 2 elements.")]
+    public GameObject[] presetPoints;
+
+    public bool beingUsed;      // Default is not being used but when a monster claims this patrol data, it checks as true, ensuring monsters don't choose the same patrol path
+}
+
 /// <summary>
 /// Every room should have a Room object holding this script with the collider adjusted to its width & height
 /// </summary>
 public class Room : MonoBehaviour
 {
+    [System.Serializable]
+    public enum PatrolPoints
+    {
+        Generate,
+        Preset
+    }
+
+    public PatrolPoints option;
+
+    public List<PresetPatrolData> presetPatrolChoices;
+
     public float wallInset = 2.5f;
     public RoomManager roomManager;
 
@@ -27,11 +51,20 @@ public class Room : MonoBehaviour
 
     // Event that is triggered when monster enters room - might not be needed
 
-    // NOT IMPLEMENTED
     // Number of fire instances in each room. 
     public int fires;
     public int MaxFires;   // Depends on room size. If number of fire reaches the amount of max fire, add behavior to move monster to another room.
 
+    public bool Accessibility;
+
+    // TODO: Event to trigger Maximum Fire --> Room inaccessible and alert monster to go out if they are inside (Drive them oustide)
+    // Room layer -> Unwalkable | Room Not accessible
+    public delegate void WhenRoomInaccessible();
+    public event WhenRoomInaccessible RoomInaccessible;
+
+    // TODO: Event to trigger when amount of fire is under maximum fire --> Room accessible again 
+    public delegate void WhenRoomAccessible();
+    public event WhenRoomAccessible  RoomAccessible;
 
     void Awake()
     {
@@ -40,7 +73,7 @@ public class Room : MonoBehaviour
 
         foreach (Collider collider in colliders)
         {
-            if (collider.isTrigger) // Ensure we only collect trigger colliders
+            if (collider.isTrigger)
             {
                 roomColliders.Add(collider);
             }
@@ -48,37 +81,39 @@ public class Room : MonoBehaviour
 
         if (roomColliders.Count > 0)
         {
-            // Start bounds with the first collider
             bounds = roomColliders[0].bounds;
-
-            // Encapsulate all additional colliders into one master bounding box
             for (int i = 1; i < roomColliders.Count; i++)
             {
                 bounds.Encapsulate(roomColliders[i].bounds);
             }
         }
-        else
+
+        // Subscribe to events
+        RoomAccessible += RoomAccessibilityUpdate;
+        RoomInaccessible += RoomAccessibilityUpdate;
+
+        // Assign pre-registered monsters in Awake()!
+        if (fireMonsters != null && fireMonsters.Count > 0)
         {
-            Debug.LogError($"{gameObject.name} has no trigger colliders attached!");
+            foreach (FireMonster monster in fireMonsters)
+            {
+                if (monster != null)
+                {
+                    monster.currentRoom = this;
+                }
+            }
         }
     }
 
     void Start()
     {
-        // For monsters pre-registered, give them room reference
-        if(fireMonsters.Count > 0)
-        {
-            foreach(FireMonster monster in fireMonsters)
-            {
-                monster.currentRoom = this;
-            }
-        }
+        
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+         
     }
 
     void OnTriggerEnter(Collider other)
@@ -89,6 +124,7 @@ public class Room : MonoBehaviour
             foreach (FireMonster monster in fireMonsters)
             {
                 monster.SetBehavior(FireMonster.MonsterBehavior.Chase);    // Update enemy state
+                                                                           // Give Enemy player position and make them turn towards(look towards) player 
             }
         }
 
@@ -113,6 +149,13 @@ public class Room : MonoBehaviour
 
         if (monster != null && fireMonsters.Contains(monster))
         {
+            // Ensure preset is released if monster leaves room physical bounds
+            if (monster.patrolOptionID != -1)
+            {
+                ReleasePresetPatrolPoints(monster.patrolOptionID);
+                monster.patrolOptionID = -1; // Reset ID on monster to prevent double-releasing
+            }
+
             fireMonsters.Remove(monster);
         }
     }
@@ -121,11 +164,15 @@ public class Room : MonoBehaviour
     public void AddFire()
     {
         fires++;
-        roomManager.AddTotalFire();
+        if (roomManager != null)
+        {
+            roomManager.AddTotalFire();
+        }
 
         if (IsMaxFiresReached())
         {
-            OnMaxFiresReached();
+            Accessibility = false;
+            RoomInaccessible?.Invoke();
         }
     }
 
@@ -136,6 +183,11 @@ public class Room : MonoBehaviour
             fires--;
             roomManager.RemoveTotalFire();
         }
+
+        if(!IsMaxFiresReached())
+        {
+            RoomAccessible.Invoke();
+        }
     }
 
     public bool IsMaxFiresReached()
@@ -143,15 +195,100 @@ public class Room : MonoBehaviour
         return fires >= MaxFires;
     }
 
-    private void OnMaxFiresReached()
+    private void RoomAccessibilityUpdate()
     {
-        // Move Monsters to adjacent room or any other behavior
+        Accessibility = !Accessibility;
+    }
+
+    //--------------------------------------------------------------------
+    // Patrol Point Option: PRESET
+    //--------------------------------------------------------------------
+    /// <summary>
+    /// Sets monster's patrol point list to an available preset.
+    /// Returns false if no free preset choices are available in this room.
+    /// </summary>
+    public bool ReservePresetPatrolPoints(FireMonster monster)
+    {
+        if (presetPatrolChoices == null || presetPatrolChoices.Count == 0) 
+        {
+            monster.patrolOptionID = -1;
+            return false;
+        }
+
+        for (int i = 0; i < presetPatrolChoices.Count; i++)
+        {
+            if (!presetPatrolChoices[i].beingUsed)
+            {
+                PresetPatrolData data = presetPatrolChoices[i];
+                data.beingUsed = true;
+                presetPatrolChoices[i] = data; // Reassign struct to list
+
+                monster.patrolOptionID = data.ID;
+
+                List<Vector3> result = new List<Vector3>();
+                if (data.presetPoints != null)
+                {
+                    foreach (GameObject go in data.presetPoints)
+                    {
+                        if (go != null)
+                        {
+                            Vector3 pos = go.transform.position;
+                            pos.y = monster.transform.position.y; // Ensure Y-height match
+                            result.Add(pos);
+                        }
+                    }
+                }
+
+                monster.patrolPoints = result;
+                Debug.Log($"[Room {gameObject.name}] Assigned Preset ID {data.ID} to {monster.gameObject.name} ({result.Count} points).");
+                return true;
+            }
+        }
+
+        monster.patrolOptionID = -1;
+        Debug.LogWarning($"[Room {gameObject.name}] All preset patrol choices are currently in use!");
+        return false;
     }
 
     /// <summary>
-    /// Returns a list of patrol points that forms a square. Allow Jitter to ensure not all enemies have the same path
+    /// Release patrol option choice that was in use for other monster to use. 
+    /// Assumes patrol ID will be the index number in according preset patrol choices array in this room
     /// </summary>
-    /// <returns>A list of patrol points</returns>
+    /// <param name="patrolID">Patrol ID and name</param>
+    public void ReleasePresetPatrolPoints(int patrolID)
+    {
+        // Guard against unassigned ID (-1) or out-of-bounds indices
+        if (patrolID < 0 || patrolID >= presetPatrolChoices.Count)
+        {
+            return;
+        }
+
+        // Modifying value-type struct requires re-assignment in C#
+        PresetPatrolData data = presetPatrolChoices[patrolID];
+        data.beingUsed = false;
+        presetPatrolChoices[patrolID] = data;
+    }
+
+
+    //--------------------------------------------------------------------
+    // Patrol Point Option: GENERATION
+    //--------------------------------------------------------------------
+    public bool IsPointInsideRoom(Vector3 point)
+    {
+        if (roomColliders == null || roomColliders.Count == 0) return true;
+
+        foreach (Collider col in roomColliders)
+        {
+            if (col == null) continue;
+            // Increased distance threshold to handle ground Y-offsets cleanly
+            if (Vector3.Distance(col.ClosestPoint(point), point) < 0.5f)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public List<Vector3> GenerateLoopPatrolPoints(PathFinding pathFinding, float offsetJitter = 0.8f)
     {
         List<Vector3> points = new List<Vector3>();
@@ -172,22 +309,30 @@ public class Room : MonoBehaviour
             float jitterZ = Random.Range(-offsetJitter, offsetJitter);
             Vector3 candidate = corner + new Vector3(jitterX, 0f, jitterZ);
 
-            // Validate point against A* grid node walkability
+            if (!IsPointInsideRoom(candidate)) continue;
+
             if (pathFinding != null && pathFinding.grid != null)
             {
                 Node node = pathFinding.grid.NodeFromWorldPoint(candidate);
                 if (node != null && node.walkable)
                 {
-                    points.Add(node.worldPosition); // Use actual walkable node position
+                    points.Add(node.worldPosition);
                 }
             }
             else
             {
                 points.Add(candidate);
             }
-    }
+        }
 
-    return points;
+        // If strict bounds filtering discarded all points, fallback to raw walkable grid nodes
+        if (points.Count == 0)
+        {
+            Debug.LogWarning($"[Room {gameObject.name}] Loop point filtering returned 0 points. Using room center fallback.");
+            points.Add(bounds.center);
+        }
+
+        return points;
     }
 
     /// <summary>
