@@ -68,6 +68,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
     private void OnTriggerStay(Collider collision)
     {
+        Debug.Log("Trigger");
         // determine collision type
         if (collision.gameObject.CompareTag("Enemy"))
         {
