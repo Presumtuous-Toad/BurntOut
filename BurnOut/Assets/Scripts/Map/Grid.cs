@@ -9,11 +9,11 @@ public class Grid : MonoBehaviour
     public LayerMask unwalkableMask;    // Obstacles - walls - need to be assigned to this layer
     public Vector2 gridWorldSize;
     public float nodeRadius;
-    Node[,] grid;
+    public Node[,] grid;
 
     float nodeDiameter;
-    int gridSizeX;
-    int gridSizeY;
+    public int gridSizeX;
+    public int gridSizeY;
 
     void Start()
     {

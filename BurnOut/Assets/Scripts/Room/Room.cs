@@ -7,6 +7,7 @@ using UnityEngine.AI;
 [System.Serializable]
 public struct PresetPatrolData
 {
+    [Header("MUST be index - cannot assign same index")]
     public int ID;  // This will be given to monster when in use and returned when not in use.
 
     [Header("One set of preset points should have at least 2 elements.")]
@@ -72,7 +73,7 @@ public class Room : MonoBehaviour
 
         foreach (Collider collider in colliders)
         {
-            if (collider.isTrigger) // Ensure we only collect trigger colliders
+            if (collider.isTrigger)
             {
                 roomColliders.Add(collider);
             }
@@ -80,35 +81,33 @@ public class Room : MonoBehaviour
 
         if (roomColliders.Count > 0)
         {
-            // Start bounds with the first collider
             bounds = roomColliders[0].bounds;
-
-            // Encapsulate all additional colliders into one master bounding box
             for (int i = 1; i < roomColliders.Count; i++)
             {
                 bounds.Encapsulate(roomColliders[i].bounds);
             }
         }
-        else
-        {
-            Debug.LogError($"{gameObject.name} has no trigger colliders attached!");
-        }
 
         // Subscribe to events
         RoomAccessible += RoomAccessibilityUpdate;
         RoomInaccessible += RoomAccessibilityUpdate;
+
+        // Assign pre-registered monsters in Awake()!
+        if (fireMonsters != null && fireMonsters.Count > 0)
+        {
+            foreach (FireMonster monster in fireMonsters)
+            {
+                if (monster != null)
+                {
+                    monster.currentRoom = this;
+                }
+            }
+        }
     }
 
     void Start()
     {
-        // For monsters pre-registered, give them room reference
-        if(fireMonsters.Count > 0)
-        {
-            foreach(FireMonster monster in fireMonsters)
-            {
-                monster.currentRoom = this;
-            }
-        }
+        
     }
 
     // Update is called once per frame
@@ -150,6 +149,13 @@ public class Room : MonoBehaviour
 
         if (monster != null && fireMonsters.Contains(monster))
         {
+            // Ensure preset is released if monster leaves room physical bounds
+            if (monster.patrolOptionID != -1)
+            {
+                ReleasePresetPatrolPoints(monster.patrolOptionID);
+                monster.patrolOptionID = -1; // Reset ID on monster to prevent double-releasing
+            }
+
             fireMonsters.Remove(monster);
         }
     }
@@ -158,11 +164,15 @@ public class Room : MonoBehaviour
     public void AddFire()
     {
         fires++;
-        roomManager.AddTotalFire();
+        if (roomManager != null)
+        {
+            roomManager.AddTotalFire();
+        }
 
         if (IsMaxFiresReached())
         {
-            RoomInaccessible.Invoke();  // Method to make and subscribe - monster chooses the closest room without fire and moves towards the center of that room(pathfinding)
+            Accessibility = false;
+            RoomInaccessible?.Invoke();
         }
     }
 
@@ -190,49 +200,95 @@ public class Room : MonoBehaviour
         Accessibility = !Accessibility;
     }
 
+    //--------------------------------------------------------------------
+    // Patrol Point Option: PRESET
+    //--------------------------------------------------------------------
     /// <summary>
-    /// Sets monster's patrol point list to a list of preset patrol points if it is not being used. 
-    //  Assumes each given patrol point set will contain more than 1 patrol points.
+    /// Sets monster's patrol point list to an available preset.
+    /// Returns false if no free preset choices are available in this room.
     /// </summary>
-    public void ReservePresetPatrolPoints(FireMonster monster)
+    public bool ReservePresetPatrolPoints(FireMonster monster)
     {
-        PresetPatrolData data;
-
-        // Choose first option that is not being used
-        for(int i = 0; i < presetPatrolChoices.Count; i++)
+        if (presetPatrolChoices == null || presetPatrolChoices.Count == 0) 
         {
-            if(!presetPatrolChoices[i].beingUsed)
+            monster.patrolOptionID = -1;
+            return false;
+        }
+
+        for (int i = 0; i < presetPatrolChoices.Count; i++)
+        {
+            if (!presetPatrolChoices[i].beingUsed)
             {
-                data = presetPatrolChoices[i];
+                PresetPatrolData data = presetPatrolChoices[i];
                 data.beingUsed = true;
-                presetPatrolChoices[i] = data;
-                continue;
+                presetPatrolChoices[i] = data; // Reassign struct to list
+
+                monster.patrolOptionID = data.ID;
+
+                List<Vector3> result = new List<Vector3>();
+                if (data.presetPoints != null)
+                {
+                    foreach (GameObject go in data.presetPoints)
+                    {
+                        if (go != null)
+                        {
+                            Vector3 pos = go.transform.position;
+                            pos.y = monster.transform.position.y; // Ensure Y-height match
+                            result.Add(pos);
+                        }
+                    }
+                }
+
+                monster.patrolPoints = result;
+                Debug.Log($"[Room {gameObject.name}] Assigned Preset ID {data.ID} to {monster.gameObject.name} ({result.Count} points).");
+                return true;
             }
         }
 
-        // Assign patrol data ID to monster
-        monster.patrolOptionID = data.ID;
+        monster.patrolOptionID = -1;
+        Debug.LogWarning($"[Room {gameObject.name}] All preset patrol choices are currently in use!");
+        return false;
+    }
 
-        // Populate List of vector to return
-        List<Vector3> result = new List<Vector3>();
-
-        if(data.presetPoints != null && data.presetPoints.Length > 1)
+    /// <summary>
+    /// Release patrol option choice that was in use for other monster to use. 
+    /// Assumes patrol ID will be the index number in according preset patrol choices array in this room
+    /// </summary>
+    /// <param name="patrolID">Patrol ID and name</param>
+    public void ReleasePresetPatrolPoints(int patrolID)
+    {
+        // Guard against unassigned ID (-1) or out-of-bounds indices
+        if (patrolID < 0 || patrolID >= presetPatrolChoices.Count)
         {
-            for(int i = 0; i < data.presetPoints.Length; i++)
-            {
-                result.Add(data.presetPoints[i].transform.position);
-            }
+            return;
         }
-        
-        // Give found data to monster
-        monster.patrolPoints = result;
+
+        // Modifying value-type struct requires re-assignment in C#
+        PresetPatrolData data = presetPatrolChoices[patrolID];
+        data.beingUsed = false;
+        presetPatrolChoices[patrolID] = data;
     }
 
 
-    /// <summary>
-    /// Returns a list of patrol points that forms a square. Allow Jitter to ensure not all enemies have the same path
-    /// </summary>
-    /// <returns>A list of patrol points</returns>
+    //--------------------------------------------------------------------
+    // Patrol Point Option: GENERATION
+    //--------------------------------------------------------------------
+    public bool IsPointInsideRoom(Vector3 point)
+    {
+        if (roomColliders == null || roomColliders.Count == 0) return true;
+
+        foreach (Collider col in roomColliders)
+        {
+            if (col == null) continue;
+            // Increased distance threshold to handle ground Y-offsets cleanly
+            if (Vector3.Distance(col.ClosestPoint(point), point) < 0.5f)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public List<Vector3> GenerateLoopPatrolPoints(PathFinding pathFinding, float offsetJitter = 0.8f)
     {
         List<Vector3> points = new List<Vector3>();
@@ -253,22 +309,30 @@ public class Room : MonoBehaviour
             float jitterZ = Random.Range(-offsetJitter, offsetJitter);
             Vector3 candidate = corner + new Vector3(jitterX, 0f, jitterZ);
 
-            // Validate point against A* grid node walkability
+            if (!IsPointInsideRoom(candidate)) continue;
+
             if (pathFinding != null && pathFinding.grid != null)
             {
                 Node node = pathFinding.grid.NodeFromWorldPoint(candidate);
                 if (node != null && node.walkable)
                 {
-                    points.Add(node.worldPosition); // Use actual walkable node position
+                    points.Add(node.worldPosition);
                 }
             }
             else
             {
                 points.Add(candidate);
             }
-    }
+        }
 
-    return points;
+        // If strict bounds filtering discarded all points, fallback to raw walkable grid nodes
+        if (points.Count == 0)
+        {
+            Debug.LogWarning($"[Room {gameObject.name}] Loop point filtering returned 0 points. Using room center fallback.");
+            points.Add(bounds.center);
+        }
+
+        return points;
     }
 
     /// <summary>

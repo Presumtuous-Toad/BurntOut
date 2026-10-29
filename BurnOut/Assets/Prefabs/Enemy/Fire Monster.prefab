@@ -138,17 +138,17 @@ MonoBehaviour:
   waypointThreshold: 0.2
   player: {fileID: 0}
   viewRadius: 12
-  viewAngle: 360
+  viewAngle: 270
   obstacleMask:
     serializedVersion: 2
     m_Bits: 64
   currentRoom: {fileID: 0}
-  currentPatrolOption: 0
+  patrolOptionID: -1
+  patrolPoints: []
   currentBehavior: 0
   firePrefab: {fileID: 8314636697169942334, guid: 82b98e9b5f6dce448a61baa923c2e53a, type: 3}
   spawnFireEveryDistance: 3
-  fireOffsetDistance: 1.2
-  pauseAndSpawnDuration: 1
+  loopPauseDuration: 2
 --- !u!54 &2009676583999894389
 Rigidbody:
   m_ObjectHideFlags: 0

@@ -14,7 +14,7 @@ public class RoomManager : MonoBehaviour
     public float damageTickRate = 5f;
     private float currentTime;
     public int totalFire;
-    
+
     private void Awake()
     {
         rooms = FindObjectsByType<Room>(FindObjectsSortMode.None).ToList();
@@ -45,5 +45,32 @@ public class RoomManager : MonoBehaviour
     public void AddTotalFire()
     {
         totalFire++;
+    }
+
+    /// <summary>
+    /// Finds the closest accessible room excluding the current room.
+    /// </summary>
+    public Room GetClosestAccessibleRoom(Vector3 searchOrigin, Room currentRoom)
+    {
+        Room closestRoom = null;
+        float minDistance = float.MaxValue;
+
+        foreach (Room room in rooms)
+        {
+            if (room == currentRoom) continue;
+
+            // Must be marked accessible AND not at max fire capacity
+            if (room.Accessibility && !room.IsMaxFiresReached())
+            {
+                float dist = Vector3.Distance(searchOrigin, room.transform.position);
+                if (dist < minDistance)
+                {
+                    minDistance = dist;
+                    closestRoom = room;
+                }
+            }
+        }
+
+        return closestRoom;
     }
 }
