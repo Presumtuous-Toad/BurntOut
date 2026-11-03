@@ -1,37 +1,116 @@
+using Ink.Runtime;
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
 
 public class DialogueManager : MonoBehaviour
 {
-    public TextMeshProUGUI nameText;
-    public TextMeshProUGUI dialogueText;
-    public Canvas diaogueCanvas;
+    [Header("Dialogue UI")]
+    [SerializeField] private GameObject dialogueCanvas;
+    [SerializeField] private TextMeshProUGUI nameText;
+    [SerializeField] private Animator portraitAnimator;
+    [SerializeField] private TextMeshProUGUI dialogueText;
+    [SerializeField] private GameObject[] choices;
+    private TextMeshProUGUI[] choicesText;
 
+    [Header("Text Display Settings")]
     public float letterWaitTime;
+    [SerializeField] private InputActionReference progressInput;
 
-    private Queue<Dialogue> dialogues;
+    private Story currentStory;
+    private string currentSentence;
+    private bool displayingChoice = false;
+    private bool sentenceIsComplete = true;            // used for skipping dialogue writing
+    private bool dialogueIsPlaying = false;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    // dialogue tags
+    private const string NAME_TAG = "name";
+    private const string PORTRAIT_TAG = "portrait";
+
+
+    public static DialogueManager Instance { get; private set; }
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Debug.LogWarning("Found more than one DialogueManager in scene");
+            Destroy(Instance);
+        }
+    }
+
     void Start()
     {
-        dialogues = new Queue<Dialogue>();
+        // removed for testing purposes
+        //dialogueCanvas.SetActive(false);
+
+        // get all choice text
+        choicesText = new TextMeshProUGUI[choices.Length];
+        for (int i = 0; i < choices.Length; i++)
+        {
+            choicesText[i] = choices[i].GetComponentInChildren<TextMeshProUGUI>();
+        }
     }
 
     /// <summary>
     /// Play new dialogue
     /// </summary>
-    /// <param name="newDialogues">dialogue to play</param>
-    public void StartDialogue(Dialogue[] newDialogues)
+    /// <param name="inkJSON">dialogue to play</param>
+    public void StartDialogue(TextAsset inkJSON)
     {
-        dialogues.Clear();
-        foreach (Dialogue d in newDialogues)
+        currentStory = new Story(inkJSON.text);
+        dialogueIsPlaying = true;
+        dialogueCanvas.SetActive(true);
+
+        // add dialogue input listener
+        progressInput.action.started += ProgressSentence;
+
+        ProgressSentence();
+    }
+
+    /// <summary>
+    /// Calls base progress sentence on input
+    /// </summary>
+    public void ProgressSentence(InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Started)
         {
-            dialogues.Enqueue(d);
+            ProgressSentence();
+        }
+    }
+
+    /// <summary>
+    /// Completes sentence early if incomplete or 
+    /// plays next sentence 
+    /// </summary>
+    public void ProgressSentence()
+    {
+        // displaying all dialogue early 
+        if (!sentenceIsComplete)
+        {
+            StopAllCoroutines();
+            dialogueText.text = currentSentence;
+            sentenceIsComplete = true;
+
+            // disable dialogue progression until choice is made
+            if (displayingChoice)
+            {
+                progressInput.action.started -= ProgressSentence;
+            }
+            
+            return;
         }
 
         DisplayNextSentence();
+        HandleTags(currentStory.currentTags);
+        if (currentStory.currentChoices.Count != 0) DisplayChoices();
     }
 
     /// <summary>
@@ -39,17 +118,19 @@ public class DialogueManager : MonoBehaviour
     /// </summary>
     public void DisplayNextSentence()
     {
+        sentenceIsComplete = false;
+
         // end dialogue
-        if (dialogues.Count == 0)
+        if (!currentStory.canContinue)
         {
             EndDialogue();
             return;
         }
 
-        Dialogue currentSentence = dialogues.Dequeue();
-        nameText.text = currentSentence.name;
+        currentSentence = currentStory.Continue();
+        //nameText.text = currentSentence.name;
         StopAllCoroutines();
-        StartCoroutine(TypeSentence(currentSentence.sentence));
+        StartCoroutine(TypeSentence(currentSentence));
     }
 
     /// <summary>
@@ -59,11 +140,12 @@ public class DialogueManager : MonoBehaviour
     private IEnumerator TypeSentence(string sentence)
     {
         dialogueText.text = "";
-        foreach(char letter in sentence)
+        foreach (char letter in sentence)
         {
             dialogueText.text += letter;
             yield return new WaitForSeconds(letterWaitTime);
         }
+        sentenceIsComplete = true;
     }
 
     /// <summary>
@@ -71,6 +153,90 @@ public class DialogueManager : MonoBehaviour
     /// </summary>
     private void EndDialogue()
     {
-        diaogueCanvas.enabled = false;
+        progressInput.action.started -= ProgressSentence;
+        dialogueText.text = "";
+        dialogueIsPlaying = false;
+        dialogueCanvas.SetActive(false);
+    }
+
+    private void DisplayChoices()
+    {
+        displayingChoice = true;
+        
+        // check if there are enough UI choices for dialogue
+        List<Choice> currentChoices = currentStory.currentChoices;
+        if (currentChoices.Count > choices.Length)
+        {
+            Debug.LogError("More choices in dialogue than UI can support.");
+        }
+
+        // display all choices
+        for (int i = 0; i < currentChoices.Count; i++)
+        {
+            choices[i].SetActive(true);
+            choicesText[i].text = currentChoices[i].text;
+        }
+
+        StartCoroutine(SelectFirstChoice());
+    }
+
+    public void MakeChoice(int choiceIndex)
+    {
+        currentStory.ChooseChoiceIndex(choiceIndex);
+        DisplayNextSentence();
+
+        // reenable dialogue progression
+        progressInput.action.started += ProgressSentence;
+        displayingChoice = false;
+
+        // turn off choices
+        foreach (GameObject choice in choices)
+        {
+            choice.SetActive(false);
+        }
+    }
+
+    /// <summary>
+    /// Set starting choice to first choice
+    /// </summary>
+    private IEnumerator SelectFirstChoice()
+    {
+        EventSystem.current.SetSelectedGameObject(null);
+        yield return new WaitForEndOfFrame();
+        EventSystem.current.SetSelectedGameObject(choices[0].gameObject);
+    }
+
+    /// <summary>
+    /// Apply changes to dialogue UI based on tags set
+    /// </summary>
+    /// <param name="currentTags"></param>
+    private void HandleTags(List<string> currentTags)
+    {
+        // loop through all tags
+        foreach(string tag in currentTags)
+        {
+            // parse tag
+            string[] splitTag = tag.Split(':');
+            if(splitTag.Length != 2 )
+            {
+                Debug.LogError("Tag could not be pased " + tag);
+            }
+            string tagKey = splitTag[0].Trim();
+            string tagValue = splitTag[1].Trim();
+
+            // identify tag
+            switch(tagKey)
+            {
+                case NAME_TAG:
+                    nameText.text = tagValue;
+                    break;
+                case PORTRAIT_TAG:
+                    portraitAnimator.Play(tagValue);
+                    break;
+                default:
+                    Debug.LogWarning("Tag not being handled: " + tag);
+                    break;
+            }
+        }
     }
 }

@@ -2,10 +2,12 @@ using UnityEngine;
 
 public class DialogueTrigger : MonoBehaviour
 {
-    public Dialogue[] dialogues;
+    [SerializeField] private TextAsset inkJSON;
 
     public void TriggerDialogue()
     {
-        FindAnyObjectByType<DialogueManager>().StartDialogue(dialogues);
+        FindAnyObjectByType<DialogueManager>().StartDialogue(inkJSON);
     }
+
+    // add trigger Enter
 }
