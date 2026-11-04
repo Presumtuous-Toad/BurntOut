@@ -16,9 +16,15 @@ public class DialogueManager : MonoBehaviour
     [SerializeField] private GameObject[] choices;
     private TextMeshProUGUI[] choicesText;
 
-    [Header("Text Display Settings")]
-    public float letterWaitTime;
+    [Header("Text Settings")]
     [SerializeField] private InputActionReference progressInput;
+    public float letterWaitTime;
+
+    [Header("Auto Play Settings")]
+    [SerializeField] private InputActionReference autoToggleInput;
+    public bool autoPlay = false;
+    public float autoPlayWait = 5;
+    private Coroutine autoPlayCoroutine;
 
     private Story currentStory;
     private string currentSentence;
@@ -69,8 +75,9 @@ public class DialogueManager : MonoBehaviour
         dialogueIsPlaying = true;
         dialogueCanvas.SetActive(true);
 
-        // add dialogue input listener
+        // add input listeners
         progressInput.action.started += ProgressSentence;
+        autoToggleInput.action.started += ToggleAuto;
 
         ProgressSentence();
     }
@@ -110,7 +117,7 @@ public class DialogueManager : MonoBehaviour
 
         DisplayNextSentence();
         HandleTags(currentStory.currentTags);
-        if (currentStory.currentChoices.Count != 0) DisplayChoices();
+        DisplayChoices();
     }
 
     /// <summary>
@@ -128,13 +135,13 @@ public class DialogueManager : MonoBehaviour
         }
 
         currentSentence = currentStory.Continue();
-        //nameText.text = currentSentence.name;
         StopAllCoroutines();
         StartCoroutine(TypeSentence(currentSentence));
     }
 
     /// <summary>
-    /// Types a letter at a time 
+    /// Types a letter at a time, 
+    /// plays next sentence if auto play is on 
     /// </summary>
     /// <param name="sentence">sentence to write</param>
     private IEnumerator TypeSentence(string sentence)
@@ -146,6 +153,12 @@ public class DialogueManager : MonoBehaviour
             yield return new WaitForSeconds(letterWaitTime);
         }
         sentenceIsComplete = true;
+
+        // wait to play next line
+        if(autoPlay && !displayingChoice)
+        {
+            autoPlayCoroutine = StartCoroutine(AutoNext());
+        }
     }
 
     /// <summary>
@@ -153,7 +166,10 @@ public class DialogueManager : MonoBehaviour
     /// </summary>
     private void EndDialogue()
     {
+        // disconnect input
         progressInput.action.started -= ProgressSentence;
+        autoToggleInput.action.started += ToggleAuto;
+
         dialogueText.text = "";
         dialogueIsPlaying = false;
         dialogueCanvas.SetActive(false);
@@ -161,16 +177,18 @@ public class DialogueManager : MonoBehaviour
 
     private void DisplayChoices()
     {
-        displayingChoice = true;
+        List<Choice> currentChoices = currentStory.currentChoices;
+
+        if (currentChoices.Count == 0) return;
         
         // check if there are enough UI choices for dialogue
-        List<Choice> currentChoices = currentStory.currentChoices;
         if (currentChoices.Count > choices.Length)
         {
             Debug.LogError("More choices in dialogue than UI can support.");
         }
 
         // display all choices
+        displayingChoice = true;
         for (int i = 0; i < currentChoices.Count; i++)
         {
             choices[i].SetActive(true);
@@ -183,7 +201,7 @@ public class DialogueManager : MonoBehaviour
     public void MakeChoice(int choiceIndex)
     {
         currentStory.ChooseChoiceIndex(choiceIndex);
-        DisplayNextSentence();
+        ProgressSentence();
 
         // reenable dialogue progression
         progressInput.action.started += ProgressSentence;
@@ -236,6 +254,30 @@ public class DialogueManager : MonoBehaviour
                 default:
                     Debug.LogWarning("Tag not being handled: " + tag);
                     break;
+            }
+        }
+    }
+
+    private IEnumerator AutoNext()
+    {
+        Debug.Log("Auto play started");
+        yield return new WaitForSeconds(autoPlayWait);
+        sentenceIsComplete = false;
+        ProgressSentence();
+    }
+
+    private void ToggleAuto(InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Started)
+        {
+            autoPlay = !autoPlay;
+            if (autoPlay)
+            {
+                autoPlayCoroutine = StartCoroutine(AutoNext());
+            }
+            else
+            {
+                if(autoPlayCoroutine != null) StopCoroutine(autoPlayCoroutine);
             }
         }
     }

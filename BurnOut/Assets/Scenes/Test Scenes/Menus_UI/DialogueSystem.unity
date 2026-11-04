@@ -549,7 +549,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ed5c4a57207ad541a7e029f086c174c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DialogueTrigger
-  inkJSON: {fileID: 4900000, guid: 5c75d6dbbc825dc4d88dc63a2419e7e9, type: 3}
+  inkJSON: {fileID: 4900000, guid: 2a4252c23af494e4f956a5a5f96c12cd, type: 3}
 --- !u!4 &573362659
 Transform:
   m_ObjectHideFlags: 0
@@ -617,8 +617,11 @@ MonoBehaviour:
   - {fileID: 1081785906}
   - {fileID: 1381830706}
   - {fileID: 2082576704}
-  letterWaitTime: 0.02
   progressInput: {fileID: 1120369429361536294, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  letterWaitTime: 0.02
+  autoToggleInput: {fileID: -7471211009204490832, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  autoPlay: 1
+  autoPlayWait: 2.5
 --- !u!1 &811719399
 GameObject:
   m_ObjectHideFlags: 0
