@@ -22,9 +22,9 @@ public class DialogueManager : MonoBehaviour
 
     [Header("Auto Play Settings")]
     [SerializeField] private InputActionReference autoToggleInput;
-    public bool autoPlay = false;
-    public float autoPlayWait = 5;
-    private Coroutine autoPlayCoroutine;
+    public bool autoAdvance = false;
+    public float advanceWait = 5;
+    private Coroutine advanceCoroutine;
 
     private Story currentStory;
     private string currentSentence;
@@ -77,7 +77,7 @@ public class DialogueManager : MonoBehaviour
 
         // add input listeners
         progressInput.action.started += ProgressSentence;
-        autoToggleInput.action.started += ToggleAuto;
+        autoToggleInput.action.started += ToggleAutoAdvance;
 
         ProgressSentence();
     }
@@ -87,7 +87,7 @@ public class DialogueManager : MonoBehaviour
     /// </summary>
     public void ProgressSentence(InputAction.CallbackContext context)
     {
-        if (context.phase == InputActionPhase.Started)
+        if (context.phase == InputActionPhase.Started )
         {
             ProgressSentence();
         }
@@ -100,18 +100,17 @@ public class DialogueManager : MonoBehaviour
     public void ProgressSentence()
     {
         // displaying all dialogue early 
-        if (!sentenceIsComplete)
+        if (!sentenceIsComplete) 
         {
             StopAllCoroutines();
             dialogueText.text = currentSentence;
             sentenceIsComplete = true;
+            return;
+        }
 
-            // disable dialogue progression until choice is made
-            if (displayingChoice)
-            {
-                progressInput.action.started -= ProgressSentence;
-            }
-            
+        if (displayingChoice)
+        {
+            progressInput.action.started -= ProgressSentence;
             return;
         }
 
@@ -155,9 +154,9 @@ public class DialogueManager : MonoBehaviour
         sentenceIsComplete = true;
 
         // wait to play next line
-        if(autoPlay && !displayingChoice)
+        if(autoAdvance && !displayingChoice)
         {
-            autoPlayCoroutine = StartCoroutine(AutoNext());
+            advanceCoroutine = StartCoroutine(AutoAdvance());
         }
     }
 
@@ -168,7 +167,7 @@ public class DialogueManager : MonoBehaviour
     {
         // disconnect input
         progressInput.action.started -= ProgressSentence;
-        autoToggleInput.action.started += ToggleAuto;
+        autoToggleInput.action.started += ToggleAutoAdvance;
 
         dialogueText.text = "";
         dialogueIsPlaying = false;
@@ -200,18 +199,18 @@ public class DialogueManager : MonoBehaviour
 
     public void MakeChoice(int choiceIndex)
     {
-        currentStory.ChooseChoiceIndex(choiceIndex);
-        ProgressSentence();
-
         // reenable dialogue progression
         progressInput.action.started += ProgressSentence;
-        displayingChoice = false;
 
         // turn off choices
+        displayingChoice = false;
         foreach (GameObject choice in choices)
         {
             choice.SetActive(false);
         }
+
+        currentStory.ChooseChoiceIndex(choiceIndex);
+        ProgressSentence();
     }
 
     /// <summary>
@@ -258,27 +257,30 @@ public class DialogueManager : MonoBehaviour
         }
     }
 
-    private IEnumerator AutoNext()
+    private IEnumerator AutoAdvance()
     {
-        Debug.Log("Auto play started");
-        yield return new WaitForSeconds(autoPlayWait);
-        sentenceIsComplete = false;
+        yield return new WaitForSeconds(advanceWait);
         ProgressSentence();
     }
 
-    private void ToggleAuto(InputAction.CallbackContext context)
+    private void ToggleAutoAdvance(InputAction.CallbackContext context)
     {
         if (context.phase == InputActionPhase.Started)
         {
-            autoPlay = !autoPlay;
-            if (autoPlay)
+            autoAdvance = !autoAdvance;
+            if (autoAdvance)
             {
-                autoPlayCoroutine = StartCoroutine(AutoNext());
+                advanceCoroutine = StartCoroutine(AutoAdvance());
             }
             else
             {
-                if(autoPlayCoroutine != null) StopCoroutine(autoPlayCoroutine);
+                if(advanceCoroutine != null) StopCoroutine(advanceCoroutine);
             }
         }
+    }
+
+    private void ToggleProgressInput()
+    {
+        progressInput.action.started += ProgressSentence;
     }
 }
