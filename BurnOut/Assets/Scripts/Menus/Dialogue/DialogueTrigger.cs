@@ -6,7 +6,7 @@ public class DialogueTrigger : MonoBehaviour
 
     public void TriggerDialogue()
     {
-        FindAnyObjectByType<DialogueManager>().StartDialogue(inkJSON);
+        DialogueManager.Instance.StartDialogue(inkJSON);
     }
 
     // add trigger Enter

@@ -12,6 +12,7 @@ public class DialogueManager : MonoBehaviour
     [SerializeField] private GameObject dialogueCanvas;
     [SerializeField] private TextMeshProUGUI nameText;
     [SerializeField] private Animator portraitAnimator;
+    [SerializeField] private Animator canvasAnimator;
     [SerializeField] private TextMeshProUGUI dialogueText;
     [SerializeField] private GameObject[] choices;
     private TextMeshProUGUI[] choicesText;
@@ -20,22 +21,22 @@ public class DialogueManager : MonoBehaviour
     [SerializeField] private InputActionReference progressInput;
     public float letterWaitTime;
 
-    [Header("Auto Play Settings")]
+    [Header("Auto Advance Settings")]
     [SerializeField] private InputActionReference autoToggleInput;
     public bool autoAdvance = false;
-    public float advanceWait = 5;
+    public float advanceWait = 2.5f;
     private Coroutine advanceCoroutine;
 
     private Story currentStory;
     private string currentSentence;
     private bool displayingChoice = false;
     private bool sentenceIsComplete = true;            // used for skipping dialogue writing
-    private bool dialogueIsPlaying = false;
+    public bool DialogueIsPlaying { get; private set; }
 
     // dialogue tags
     private const string NAME_TAG = "name";
     private const string PORTRAIT_TAG = "portrait";
-
+    private const string CANVAS_TAG = "canvas";
 
     public static DialogueManager Instance { get; private set; }
 
@@ -56,6 +57,7 @@ public class DialogueManager : MonoBehaviour
     {
         // removed for testing purposes
         //dialogueCanvas.SetActive(false);
+        DialogueIsPlaying = false;
 
         // get all choice text
         choicesText = new TextMeshProUGUI[choices.Length];
@@ -66,13 +68,13 @@ public class DialogueManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Play new dialogue
+    /// Play new dialogue using character dialogue box
     /// </summary>
     /// <param name="inkJSON">dialogue to play</param>
     public void StartDialogue(TextAsset inkJSON)
     {
         currentStory = new Story(inkJSON.text);
-        dialogueIsPlaying = true;
+        DialogueIsPlaying = true;
         dialogueCanvas.SetActive(true);
 
         // add input listeners
@@ -85,7 +87,7 @@ public class DialogueManager : MonoBehaviour
     /// <summary>
     /// Calls base progress sentence on input
     /// </summary>
-    public void ProgressSentence(InputAction.CallbackContext context)
+    private void ProgressSentence(InputAction.CallbackContext context)
     {
         if (context.phase == InputActionPhase.Started )
         {
@@ -97,7 +99,7 @@ public class DialogueManager : MonoBehaviour
     /// Completes sentence early if incomplete or 
     /// plays next sentence 
     /// </summary>
-    public void ProgressSentence()
+    private void ProgressSentence()
     {
         // displaying all dialogue early 
         if (!sentenceIsComplete) 
@@ -167,10 +169,10 @@ public class DialogueManager : MonoBehaviour
     {
         // disconnect input
         progressInput.action.started -= ProgressSentence;
-        autoToggleInput.action.started += ToggleAutoAdvance;
+        autoToggleInput.action.started -= ToggleAutoAdvance;
 
         dialogueText.text = "";
-        dialogueIsPlaying = false;
+        DialogueIsPlaying = false;
         dialogueCanvas.SetActive(false);
     }
 
@@ -250,6 +252,22 @@ public class DialogueManager : MonoBehaviour
                 case PORTRAIT_TAG:
                     portraitAnimator.Play(tagValue);
                     break;
+                case CANVAS_TAG:
+                    canvasAnimator.Play(tagValue);
+                    // disable dialogue controls for pop UI
+                    if (tagValue == "pop_up")
+                    {
+                        autoAdvance = true;
+                        progressInput.action.started -= ProgressSentence;
+                        autoToggleInput.action.started -= ToggleAutoAdvance;
+                    }
+                    else if(tagValue == "default")
+                    {
+                        autoAdvance = false;
+                        progressInput.action.started += ProgressSentence;
+                        autoToggleInput.action.started += ToggleAutoAdvance;
+                    }
+                    break;
                 default:
                     Debug.LogWarning("Tag not being handled: " + tag);
                     break;
@@ -277,10 +295,5 @@ public class DialogueManager : MonoBehaviour
                 if(advanceCoroutine != null) StopCoroutine(advanceCoroutine);
             }
         }
-    }
-
-    private void ToggleProgressInput()
-    {
-        progressInput.action.started += ProgressSentence;
     }
 }
