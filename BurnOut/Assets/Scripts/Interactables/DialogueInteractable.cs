@@ -1,43 +1,40 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.VFX;
 
 public class DialogueInteractable : MonoBehaviour, IInteractable
 {
     [SerializeField] private TextAsset inkJSON;
+    [SerializeField] private GameObject interactIcon;
     [SerializeField] private bool canInteract;
-    [SerializeField] private bool interactAgain;
-    public bool CanInteract { get { return canInteract; } set { canInteract = value; } }
+
+    public GameObject Icon { get => interactIcon; }
+    public bool CanInteract { get => canInteract; }
 
     private void Start()
     {
-        CanInteract = canInteract;
+        if(DialogueManager.Instance == null)
+        {
+            Debug.LogWarning("Object referencing dialogue manager and it does not exist");
+        }
+        interactIcon.SetActive(false);
     }
 
     /// <summary>
     /// Run dialogue 
     /// </summary>
-    public void Interact()
+    public void Interact(PlayerController player)
     {
         if(CanInteract && !DialogueManager.Instance.DialogueIsPlaying)
         {
+            canInteract = false;
+            RemoveIcon();
             DialogueManager.Instance.StartDialogue(inkJSON);
-            canInteract = interactAgain;
         }
     }
 
-    private void OnTriggerEnter(Collider other)
+    public void RemoveIcon()
     {
-        if(other.gameObject.CompareTag("Player"))
-        {
-
-        }
-        // add interact listener 
-        //progressInput.action.started += CanInteract;
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        // remove listener 
-
+        if (Icon != null) if (!CanInteract) Icon.SetActive(false);
     }
 }
