@@ -1,6 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.VFX;
 
 public class DialogueInteractable : MonoBehaviour, IInteractable
 {
@@ -35,6 +33,6 @@ public class DialogueInteractable : MonoBehaviour, IInteractable
 
     public void RemoveIcon()
     {
-        if (Icon != null) if (!CanInteract) Icon.SetActive(false);
+        if (Icon != null) Icon.SetActive(false);
     }
 }

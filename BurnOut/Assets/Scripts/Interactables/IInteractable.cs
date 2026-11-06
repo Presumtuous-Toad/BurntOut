@@ -18,7 +18,7 @@ public interface IInteractable
     }
     public virtual void RemoveIcon()
     {
-        if(Icon != null) if(!CanInteract) Icon.SetActive(false);
+        if(Icon != null) Icon.SetActive(false);
     }
 
 }
