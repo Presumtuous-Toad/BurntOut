@@ -1,7 +1,7 @@
 -> main
 
 === main ===
-#name: Mentor #portrait: mentor_neutral
+#name: Mentor #portrait: mentor_neutral #canvas: default
 Welcome to the firehouse! 
 So you think you're cut out for the job, eh?
 -> r1

@@ -1,6 +1,7 @@
 ->main
 
 === main ===
+#canvas: default
 This is testing the spawning portraits. #name: Mentor #portrait: mentor_neutral
 I am your mentor talking.
 Now i am the player talking. #name: Player #portrait: player_neutral

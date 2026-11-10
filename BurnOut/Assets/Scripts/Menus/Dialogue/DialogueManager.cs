@@ -76,6 +76,7 @@ public class DialogueManager : MonoBehaviour
         currentStory = new Story(inkJSON.text);
         DialogueIsPlaying = true;
         dialogueCanvas.SetActive(true);
+        canvasAnimator.enabled = true;
 
         // add input listeners
         progressInput.action.started += ProgressSentence;
@@ -131,6 +132,7 @@ public class DialogueManager : MonoBehaviour
         // end dialogue
         if (!currentStory.canContinue)
         {
+            sentenceIsComplete = true;
             EndDialogue();
             return;
         }

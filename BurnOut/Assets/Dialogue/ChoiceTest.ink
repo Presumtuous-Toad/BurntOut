@@ -1,7 +1,7 @@
 ->main
 
 === main ===
-This is test dialogue. #name: Mentor #portrait: mentor_neutral
+This is test dialogue. #name: Mentor #portrait: mentor_neutral #canvas: default
 I am currently displaying correctly. 
 Now let's try some choices. Choose a fruit:
     +[apple]

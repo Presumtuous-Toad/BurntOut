@@ -1922,7 +1922,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ecec85909fd0764695b01548e8b680e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DialogueManager
-  dialogueCanvas: {fileID: 6564511193113038955}
+  dialogueCanvas: {fileID: 1952284515657855455}
   nameText: {fileID: 1163463387206989329}
   portraitAnimator: {fileID: 5913341685228171336}
   canvasAnimator: {fileID: 7078748902032574459}
