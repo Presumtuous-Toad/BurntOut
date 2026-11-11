@@ -2,14 +2,18 @@
 
 === main ===
 #name: Mentor #portrait: mentor_neutral #canvas: default
-Go in there and try to knock over some of the targets
+Go through that door and knock over some of those targets!
+
+#name: Rookie #portrait: player_neutral
+I'll try my best...
 -> hydrant
 // just to get rid of error (will need additional code)^^
 
 === hydrant ===
 // after running out of water
 #name: Mentor #portrait: mentor_neutral #canvas: default
-Ha! Out of water already? Haul that fire hydrant over here and fill 'er up!
+Ha! Out of water already? 
+Haul that fire hydrant over here and fill 'er up!
 -> final
 // just to get rid of error (will need additional code)^^
 
