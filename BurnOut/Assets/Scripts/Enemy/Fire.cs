@@ -19,7 +19,7 @@ public class Fire : Enemy
     private float spawnRate;
     private int childFires;
     private const int MAX_ATTEMPTS = 10;
-    private bool stopSapwning = false;
+    [SerializeField] private bool stopSapwning = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     protected override void Start()
