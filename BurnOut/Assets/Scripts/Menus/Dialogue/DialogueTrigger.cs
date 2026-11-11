@@ -4,8 +4,8 @@ using UnityEngine;
 public class DialogueTrigger : MonoBehaviour
 {
     [SerializeField] private TextAsset inkJSON;
-
-    private bool hasRun = false;
+    [SerializeField] private bool play = true;
+    [SerializeField] private bool playAgain = false;
 
     public void TriggerDialogue()
     {
@@ -14,8 +14,9 @@ public class DialogueTrigger : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!hasRun)
+        if (play)
         {
+            play = playAgain;
             DialogueManager.Instance.StartDialogue(inkJSON);
         }
     }
