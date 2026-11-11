@@ -4,6 +4,8 @@
 #name: Mentor #portrait: mentor_neutral #canvas: default
 Go through that door and knock over some of those targets!
 
+Fire spreads. Lucky for you, this is just cardboard, BWAHAHHA
+
 #name: Rookie #portrait: player_neutral
 I'll try my best...
 -> hydrant

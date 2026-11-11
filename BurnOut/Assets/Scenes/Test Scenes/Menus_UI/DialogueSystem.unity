@@ -275,7 +275,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ed5c4a57207ad541a7e029f086c174c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DialogueTrigger
-  inkJSON: {fileID: 4900000, guid: c3e9c30f022624fd08c2bee2c18fcd6e, type: 3}
+  inkJSON: {fileID: 4900000, guid: 983003b85cfd749eeb1568c57e70de14, type: 3}
 --- !u!4 &573362659
 Transform:
   m_ObjectHideFlags: 0
