@@ -33,7 +33,7 @@ public class PlayerHealth : MonoBehaviour, IDamageable
 
     public void Death()
     {
-        SceneManager.LoadScene(2);
+        SceneManager.LoadScene(3);
     }
 
     private void OnCollisionEnter(Collision collision)

@@ -27,6 +27,13 @@ public class PlayerController : MonoBehaviour
     void FixedUpdate()
     {
     
+        // dialogue is playing, player does not move
+        if(DialogueManager.Instance != null)
+        {
+            if (DialogueManager.Instance.DialogueIsPlaying) return;
+        }
+
+        // adjust speed when carrying fire hyrant
         if (FireHydrant.isHydrantPickedUp)
         {
             speed = encumberedSpeed;
