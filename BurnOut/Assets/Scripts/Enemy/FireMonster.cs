@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-public class FireMonster : Enemy
+public class FireMonster : Enemy, IDespawnNotifier
 {
     [Header("Movement")]
     public float moveSpeed = 3.0f;
@@ -45,9 +45,16 @@ public class FireMonster : Enemy
     private float pauseTimer = 0f;
     private bool isPausingBetweenLoops = false;
 
+    public event System.Action OnDespawn;   // Despawn Action
+
     protected override void Start()
     {
         base.Start();
+    }
+
+    protected void OnEnable()
+    {
+        timeSinceDmg = dmgCooldown;
 
         foreach (Transform child in transform)
         {
@@ -61,19 +68,41 @@ public class FireMonster : Enemy
         }
         else
         {
-            Debug.LogError($"[FireMonster] {gameObject.name} is missing a Rigidbody component!");
+            Debug.LogError($"{gameObject.name} is missing a Rigidbody component!");
         }
 
         pathFinding = FindFirstObjectByType<PathFinding>();
         lastFireSpawnPosition = transform.position;
 
-        SetBehavior(MonsterBehavior.Patrol);
+        state = Enemy.EnemyState.Alive;
+
+        if (currentRoom != null || DetectCurrentRoom())
+        {
+            SetBehavior(MonsterBehavior.Patrol);
+        }
+        else
+        {
+            currentBehavior = MonsterBehavior.Patrol;
+        }
     }
 
     protected override void Update()
     {
         base.Update();
         timeSinceDmg += Time.deltaTime;
+
+       if (currentRoom == null)
+        {
+            if (DetectCurrentRoom())
+            {
+                lastFireSpawnPosition = transform.position;
+                InitializePatrolRoute();
+            }
+            else
+            {
+                return; 
+            }
+        }
 
         bool canSee = CanSeePlayer();
 
@@ -97,7 +126,6 @@ public class FireMonster : Enemy
                 break;
         }
 
-        // SPAWN FIRE TRAIL IN ALL STATES (Patrol, Chase, ChangingRoom)
         CheckTrailFireSpawn();
     }
 
@@ -108,6 +136,31 @@ public class FireMonster : Enemy
             FollowPath();
         }
     }
+
+    protected override void Death()
+    {
+        // Reset room and other options
+        if (currentRoom != null)
+        {
+            currentRoom.RoomInaccessible -= HandleRoomInaccessible;
+            
+            if (patrolOptionID != -1)
+            {
+                currentRoom.ReleasePresetPatrolPoints(patrolOptionID);
+                patrolOptionID = -1;
+            }
+            
+            currentRoom.fireMonsters.Remove(this);
+            currentRoom = null;
+        }
+
+        patrolPoints.Clear();
+        currentPath.Clear();
+        isPausingBetweenLoops = false;
+
+        OnDespawn?.Invoke();    // Setting inactive is done inside pool
+    }
+
 
     public void SetBehavior(MonsterBehavior newBehavior)
     {
@@ -128,7 +181,7 @@ public class FireMonster : Enemy
     {
         if (currentRoom == null)
         {
-            Debug.LogError($"[FireMonster] {gameObject.name} cannot initialize patrol: currentRoom is NULL!");
+            Debug.LogError($"{gameObject.name} cannot initialize patrol: currentRoom is NULL!");
             return;
         }
 
@@ -148,7 +201,7 @@ public class FireMonster : Enemy
                 // If room preset reservation failed (full or unassigned), evacuate or generate grid loop fallback
                 if (!reserved)
                 {
-                    Debug.LogWarning($"[FireMonster] {gameObject.name} could not reserve preset in {currentRoom.gameObject.name}. Falling back to generated grid loop.");
+                    Debug.LogWarning($"{gameObject.name} could not reserve preset in {currentRoom.gameObject.name}. Falling back to generated grid loop.");
                     patrolPoints = currentRoom.GenerateLoopPatrolPoints(pathFinding);
                     patrolOptionID = -1;
                 }
@@ -168,7 +221,7 @@ public class FireMonster : Enemy
             bool success = RequestPathTo(patrolPoints[0]);
             if (!success)
             {
-                Debug.LogWarning($"[FireMonster] {gameObject.name} failed initial pathing to patrol point 0. Trying point 1...");
+                Debug.LogWarning($"{gameObject.name} failed initial pathing to patrol point 0. Trying point 1...");
                 ProcessPatrolState(); // Step through to next valid waypoint
             }
         }
@@ -176,7 +229,7 @@ public class FireMonster : Enemy
 
     private void HandleRoomInaccessible()
     {
-        Debug.Log($"[FireMonster] {gameObject.name} received RoomInaccessible event from {currentRoom.gameObject.name}!");
+        Debug.Log($"{gameObject.name} received RoomInaccessible event from {currentRoom.gameObject.name}!");
 
         // Chase mode takes precedence over evacuation
         if (currentBehavior == MonsterBehavior.Chase) return;
@@ -190,7 +243,7 @@ public class FireMonster : Enemy
 
         if (currentRoom.roomManager == null)
         {
-            Debug.LogError($"[FireMonster] {gameObject.name} cannot evacuate: RoomManager reference on {currentRoom.gameObject.name} is missing!");
+            Debug.LogError($"{gameObject.name} cannot evacuate: RoomManager reference on {currentRoom.gameObject.name} is missing!");
             return;
         }
 
@@ -198,7 +251,7 @@ public class FireMonster : Enemy
 
         if (targetRoom != null)
         {
-            Debug.Log($"[FireMonster] {gameObject.name} evacuating from {currentRoom.gameObject.name} to {targetRoom.gameObject.name}.");
+            Debug.Log($"{gameObject.name} evacuating from {currentRoom.gameObject.name} to {targetRoom.gameObject.name}.");
 
             // Release preset in old room
             if (patrolOptionID != -1)
@@ -219,12 +272,12 @@ public class FireMonster : Enemy
             bool pathSuccess = RequestPathTo(targetCenter);
             if (!pathSuccess)
             {
-                Debug.LogError($"[FireMonster] {gameObject.name} failed to find path to evac room center {targetCenter}!");
+                Debug.LogError($"{gameObject.name} failed to find path to evac room center {targetCenter}!");
             }
         }
         else
         {
-            Debug.LogWarning($"[FireMonster] {gameObject.name} could not find any accessible target room to evacuate to!");
+            Debug.LogWarning($"{gameObject.name} could not find any accessible target room to evacuate to!");
         }
     }
 
@@ -361,7 +414,7 @@ public class FireMonster : Enemy
 
         if (startNode == null || targetNode == null)
         {
-            Debug.LogWarning($"[FireMonster] Out of grid bounds! Start: {startNode != null}, Target: {targetNode != null}");
+            Debug.LogWarning($"Out of grid bounds! Start: {startNode != null}, Target: {targetNode != null}");
             return false;
         }
 
@@ -369,7 +422,7 @@ public class FireMonster : Enemy
         Vector3 validStartPos = transform.position;
         if (!startNode.walkable)
         {
-            Debug.LogWarning($"[FireMonster] Start position {transform.position} is UNWALKABLE! Finding nearest walkable node...");
+            Debug.LogWarning($"Start position {transform.position} is UNWALKABLE! Finding nearest walkable node...");
             Node nearestStart = GetNearestWalkableNode(startNode);
             if (nearestStart != null) validStartPos = nearestStart.worldPosition;
             else return false;
@@ -494,5 +547,27 @@ public class FireMonster : Enemy
         if (Physics.Raycast(origin, dirToPlayer, distToPlayer - 0.1f, obstacleMask)) return false;
 
         return true;
+    }
+
+    private bool DetectCurrentRoom()
+    {
+        Collider[] hits = Physics.OverlapSphere(transform.position, 1.5f, ~0, QueryTriggerInteraction.Collide);
+        
+        foreach (var hit in hits)
+        {
+            Room foundRoom = hit.GetComponent<Room>();
+            if (foundRoom == null) foundRoom = hit.GetComponentInParent<Room>();
+
+            if (foundRoom != null)
+            {
+                currentRoom = foundRoom;
+                if (!currentRoom.fireMonsters.Contains(this))
+                {
+                    currentRoom.fireMonsters.Add(this);
+                }
+                return true;
+            }
+        }
+        return false;
     }
 }
