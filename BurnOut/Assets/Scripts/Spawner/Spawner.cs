@@ -74,6 +74,10 @@ public class Spawner : Enemy
             data.spawnTimer.timer = 0f;
             data.spawnTimer.nextInterval += data.spawnTimer.spawnInterval;
         }
+        if(state == EnemyState.Dead)
+        {
+            gameObject.SetActive(false);
+        }
     }
 
     private void TrySpawn(SpawnData data)

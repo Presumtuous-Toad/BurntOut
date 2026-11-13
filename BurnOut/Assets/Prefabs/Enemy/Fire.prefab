@@ -133,7 +133,7 @@ MonoBehaviour:
   state: 0
   <dmgCooldown>k__BackingField: 0
   <timeSinceDmg>k__BackingField: 0
-  <Health>k__BackingField: 10
+  <Health>k__BackingField: 3
   room: {fileID: 0}
   FirePrefab: {fileID: 8314636697169942334, guid: 11c5b60aa6bca9b41a9ae52411ac1099, type: 3}
   MaxChildFires: 3

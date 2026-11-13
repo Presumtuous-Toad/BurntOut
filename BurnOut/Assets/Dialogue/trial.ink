@@ -16,6 +16,7 @@ I'll try my best...
 #name: Mentor #portrait: mentor_neutral #canvas: default
 Ha! Out of water already? 
 Haul that fire hydrant over here and fill 'er up!
+Don't worry, you'll have more in the field!
 #end: 
 -> final
 // just to get rid of error (will need additional code)^^

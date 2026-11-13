@@ -1,6 +1,8 @@
 using System.IO.MemoryMappedFiles;
+using UnityEditor.SearchService;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GunController : MonoBehaviour
@@ -14,6 +16,7 @@ public class GunController : MonoBehaviour
     [SerializeField] private int ammoPerSecond;
     [field: SerializeField]public int ammo { get; private set; }
     //private bool reloading;
+
     private bool firing;
     [SerializeField] private float reloadSpeed; //how long it takes to reload
     [SerializeField] private ReloadBar ReloadBar;
@@ -38,8 +41,10 @@ public class GunController : MonoBehaviour
     void Update()
     {
         // end early if dialogue is playing
-        if (DialogueManager.Instance.DialogueIsPlaying) return;
-
+        if (SceneManager.GetActiveScene().name != "Level1Main")
+        {
+            if (DialogueManager.Instance.DialogueIsPlaying) return;
+        }
         Vector2 mouseScreenPosition = Mouse.current.position.ReadValue();
         Ray ray = mainCamera.ScreenPointToRay(mouseScreenPosition);
         Plane groundPlane = new Plane(Vector3.up, transform.position);
@@ -54,7 +59,13 @@ public class GunController : MonoBehaviour
             //    transform.rotation = Quaternion.LookRotation(-lookDirection);
             //}
         }
-        if(firing)
+        
+        ammoSlider.value = ammo;
+    }
+
+    private void FixedUpdate()
+    {
+        if (firing)
         {
             //fixes jittering in ammo slider while at max ammo and under hydrant
             if (!(FireHydrant.inHydrantRange && ammo == maxAmmo)) ammo--;
@@ -65,18 +76,18 @@ public class GunController : MonoBehaviour
                 firing = false;
             }
         }
-        ammoSlider.value = ammo;
-    }
-
-    private void FixedUpdate()
-    {
         if (FireHydrant.inHydrantRange && ammo < maxAmmo) ammo += ammoPerSecond;
     }
 
     private void OnHoseStarted(InputAction.CallbackContext context)
     {
         // end early if dialogue is playing
-        if (DialogueManager.Instance.DialogueIsPlaying) return;
+
+        if (SceneManager.GetActiveScene().name != "Level1Main")
+        {
+            if (DialogueManager.Instance.DialogueIsPlaying) return;
+        }
+
         if (!hose.isPlaying && ammo > 0 && !FireHydrant.isHydrantPickedUp)
         {
             firing = true;

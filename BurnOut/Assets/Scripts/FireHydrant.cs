@@ -57,7 +57,7 @@ public class FireHydrant : MonoBehaviour
     private void PlaceHydrant(InputAction.CallbackContext context)
     {
         CurrentHydrant.gameObject.SetActive(true);
-        CurrentHydrant.transform.position = new Vector3(BackHydrant.transform.position.x, 0, BackHydrant.transform.position.z);
+        CurrentHydrant.transform.position = new Vector3(BackHydrant.transform.position.x, -0.82f, BackHydrant.transform.position.z);
         BackHydrant.gameObject.SetActive(false);
         Gun.SetActive(true);
 
