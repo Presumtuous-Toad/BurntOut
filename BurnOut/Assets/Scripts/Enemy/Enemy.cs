@@ -65,7 +65,6 @@ public abstract class Enemy : MonoBehaviour, IDamageable
     protected virtual void Death()
     {
         state = EnemyState.Dead;
-        gameObject.SetActive(false);
     }
 
     // Enemy deals the corresponding damage
