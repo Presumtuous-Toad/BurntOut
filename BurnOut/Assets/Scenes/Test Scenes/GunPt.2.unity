@@ -84370,6 +84370,10 @@ PrefabInstance:
       propertyPath: CurrentHydrant
       value: 
       objectReference: {fileID: 531472792}
+    - target: {fileID: 3636456814526649674, guid: 122339c2e305e7348924edef07526c0f, type: 3}
+      propertyPath: ammoPerSecond
+      value: 0.1
+      objectReference: {fileID: 0}
     - target: {fileID: 7173622043332317989, guid: 122339c2e305e7348924edef07526c0f, type: 3}
       propertyPath: m_Name
       value: Player (1)

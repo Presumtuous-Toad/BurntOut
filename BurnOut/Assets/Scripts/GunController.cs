@@ -11,8 +11,9 @@ public class GunController : MonoBehaviour
     [SerializeField] private InputActionReference attackAction;
     [SerializeField] private InputActionReference reloadAction;
     [SerializeField] private int maxAmmo;
+    [SerializeField] private int ammoPerSecond;
     [field: SerializeField]public int ammo { get; private set; }
-    private bool reloading;
+    //private bool reloading;
     private bool firing;
     [SerializeField] private float reloadSpeed; //how long it takes to reload
     [SerializeField] private ReloadBar ReloadBar;
@@ -23,11 +24,11 @@ public class GunController : MonoBehaviour
         mainCamera = Camera.main;
         attackAction.action.started += OnHoseStarted;
         attackAction.action.canceled += OnHoseStopped;
-        reloadAction.action.performed += OnReaoad;
+       //reloadAction.action.performed += OnReaoad;
 
         firing = false;
         ammo = maxAmmo;
-        reloading = false;
+        //reloading = false;
 
         ammoSlider.maxValue = maxAmmo;
         ammoSlider.value = ammo;
@@ -55,8 +56,9 @@ public class GunController : MonoBehaviour
         }
         if(firing)
         {
-            ammo--;
-            if (ammo < 0)
+            //fixes jittering in ammo slider while at max ammo and under hydrant
+            if (!(FireHydrant.inHydrantRange && ammo == maxAmmo)) ammo--;
+            if (ammo <= 0)
             {
                 ammo = 0;
                 hose.Stop();
@@ -66,12 +68,16 @@ public class GunController : MonoBehaviour
         ammoSlider.value = ammo;
     }
 
+    private void FixedUpdate()
+    {
+        if (FireHydrant.inHydrantRange && ammo < maxAmmo) ammo += ammoPerSecond;
+    }
+
     private void OnHoseStarted(InputAction.CallbackContext context)
     {
         // end early if dialogue is playing
         if (DialogueManager.Instance.DialogueIsPlaying) return;
-
-        if (!hose.isPlaying && ammo > 0 && !reloading && !FireHydrant.isHydrantPickedUp)
+        if (!hose.isPlaying && ammo > 0 && !FireHydrant.isHydrantPickedUp)
         {
             firing = true;
             hose.Play();
@@ -84,27 +90,31 @@ public class GunController : MonoBehaviour
         firing = false;
     }
 
-    private void OnReaoad(InputAction.CallbackContext context)
-    {
-        if (!reloading && FireHydrant.inHydrantRange && !FireHydrant.isHydrantPickedUp) 
-        {            
-            reloading = true;
-            ReloadBar.reload();
-            Invoke(nameof(ReloadComplete), reloadSpeed);
-        }
-        
-    }
 
-    private void ReloadComplete()
-    {
-        ammo = maxAmmo;
-        reloading = false;
-    }
+    /*
+     * Preserving these methods in case we decided to go back to reloading later
+     * 
+     * private void OnReaoad(InputAction.CallbackContext context)
+     {
+         if (!reloading && FireHydrant.inHydrantRange && !FireHydrant.isHydrantPickedUp) 
+         {            
+             reloading = true;
+             ReloadBar.reload();
+             Invoke(nameof(ReloadComplete), reloadSpeed);
+         }
 
+     }
+
+     private void ReloadComplete()
+     {
+         ammo = maxAmmo;
+         reloading = false;
+     }
+    */
     private void OnDestroy()
     {
         attackAction.action.started -= OnHoseStarted;
         attackAction.action.canceled -= OnHoseStopped;
-        reloadAction.action.performed -= OnReaoad;
+        //reloadAction.action.performed -= OnReaoad;
     }
 }
