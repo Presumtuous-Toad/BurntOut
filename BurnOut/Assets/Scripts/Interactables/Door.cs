@@ -6,10 +6,22 @@ public class Door : MonoBehaviour, IInteractable
     [SerializeField] private GameObject interactIcon;
     [SerializeField] private bool canInteract;
 
-    private bool isOpen = false;
+    public bool isOpen = false;
 
     public GameObject Icon { get => interactIcon; }
     public bool CanInteract { get => canInteract; }
+
+    private void Start()
+    {
+        if (isOpen)
+        {
+            animator.Play("open");
+        }
+        else
+        {
+            animator.Play("close");
+        }
+    }
 
     /// <summary>
     /// Run dialogue 

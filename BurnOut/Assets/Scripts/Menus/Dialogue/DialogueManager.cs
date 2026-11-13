@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.EventSystems;
+using System;
 
 public class DialogueManager : MonoBehaviour
 {
@@ -33,9 +34,12 @@ public class DialogueManager : MonoBehaviour
     private bool sentenceIsComplete = true;            // used for skipping dialogue writing
     public bool DialogueIsPlaying { get; private set; }
 
+    public event EventHandler OnDialogueComplete;
+
     // dialogue tags
     private const string NAME_TAG = "name";
     private const string PORTRAIT_TAG = "portrait";
+    private const string END_TAG = "end";
     private const string CANVAS_TAG = "canvas";
 
     public static DialogueManager Instance { get; private set; }
@@ -51,13 +55,14 @@ public class DialogueManager : MonoBehaviour
             Debug.LogWarning("Found more than one DialogueManager in scene");
             Destroy(Instance);
         }
+
+        DialogueIsPlaying = false;
     }
 
     void Start()
     {
         // removed for testing purposes
         //dialogueCanvas.SetActive(false);
-        DialogueIsPlaying = false;
 
         // get all choice text
         choicesText = new TextMeshProUGUI[choices.Length];
@@ -73,16 +78,35 @@ public class DialogueManager : MonoBehaviour
     /// <param name="inkJSON">dialogue to play</param>
     public void StartDialogue(TextAsset inkJSON)
     {
+        StopAllCoroutines();
+
         currentStory = new Story(inkJSON.text);
-        DialogueIsPlaying = true;
-        dialogueCanvas.SetActive(true);
-        canvasAnimator.enabled = true;
+        EnableCanvas();
 
         // add input listeners
         progressInput.action.started += ProgressSentence;
         autoToggleInput.action.started += ToggleAutoAdvance;
 
         ProgressSentence();
+    }
+
+    /// <summary>
+    /// Start dialogue and atach a method to play when dialogue is complete
+    /// </summary>
+    /// <param name="inkJson">dialogue to paly</param>
+    /// <param name="listenerMethod">method to play when dialogue ends</param>
+    public void StartDialogue(TextAsset inkJson, EventHandler listenerMethod)
+    {
+        OnDialogueComplete = null;  // temp fix
+        OnDialogueComplete += listenerMethod;
+        StartDialogue(inkJson);
+    }
+
+    private void EnableCanvas()
+    {
+        DialogueIsPlaying = true;
+        dialogueCanvas.SetActive(true);
+        canvasAnimator.enabled = true;
     }
 
     /// <summary>
@@ -125,7 +149,7 @@ public class DialogueManager : MonoBehaviour
     /// <summary>
     /// Plays next sentence of dialogue
     /// </summary>
-    public void DisplayNextSentence()
+    private void DisplayNextSentence()
     {
         sentenceIsComplete = false;
 
@@ -140,6 +164,34 @@ public class DialogueManager : MonoBehaviour
         currentSentence = currentStory.Continue();
         StopAllCoroutines();
         StartCoroutine(TypeSentence(currentSentence));
+    }
+
+    /// <summary>
+    /// Play a sentence from a given start point in dialogue
+    /// </summary>
+    /// <param name="inkJSON">file with all dialogue</param>
+    /// <param name="pathName">location of dialogue to start at</param>
+    public void JumpToSentenceInStory(TextAsset inkJSON, string pathName)
+    {
+        StopAllCoroutines();
+
+        currentStory = new Story(inkJSON.text);
+        currentStory.ChoosePathString(pathName);
+        EnableCanvas();
+        ProgressSentence();
+    }
+
+    /// <summary>
+    /// Play a sentence from a given start point in dialogue
+    /// </summary>
+    /// <param name="inkJSON">dialogue to paly</param>
+    /// <param name="pathName">location of dialogue to start at</param>
+    /// <param name="listenerMethod">method to play when dialogue ends</param>
+    public void JumpToSentenceInStory(TextAsset inkJSON, string pathName, EventHandler listenerMethod)
+    {
+        OnDialogueComplete = null;
+        OnDialogueComplete += listenerMethod;
+        JumpToSentenceInStory(inkJSON, pathName);
     }
 
     /// <summary>
@@ -173,6 +225,11 @@ public class DialogueManager : MonoBehaviour
         progressInput.action.started -= ProgressSentence;
         autoToggleInput.action.started -= ToggleAutoAdvance;
 
+        // run listening/clear events (if applicable)
+        OnDialogueComplete?.Invoke(this, EventArgs.Empty);
+        OnDialogueComplete = null;
+
+        // turn off dialogue
         dialogueText.text = "";
         DialogueIsPlaying = false;
         dialogueCanvas.SetActive(false);
@@ -248,24 +305,29 @@ public class DialogueManager : MonoBehaviour
             // identify tag
             switch(tagKey)
             {
-                case NAME_TAG:
+                case NAME_TAG:      // switch name
                     nameText.text = tagValue;
                     break;
-                case PORTRAIT_TAG:
+                case PORTRAIT_TAG:  // switch portait
                     portraitAnimator.Play(tagValue);
                     break;
-                case CANVAS_TAG:
+                case END_TAG:       // end early
+                    EndDialogue();
+                    break;
+                case CANVAS_TAG:    // swap canvas position
                     canvasAnimator.Play(tagValue);
                     // disable dialogue controls for pop UI
                     if (tagValue == "pop_up")
                     {
                         autoAdvance = true;
+                        DialogueIsPlaying = false;
                         progressInput.action.started -= ProgressSentence;
                         autoToggleInput.action.started -= ToggleAutoAdvance;
                     }
                     else if(tagValue == "default")
                     {
                         autoAdvance = false;
+                        DialogueIsPlaying = true;
                         progressInput.action.started += ProgressSentence;
                         autoToggleInput.action.started += ToggleAutoAdvance;
                     }

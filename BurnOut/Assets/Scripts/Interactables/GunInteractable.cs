@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class GunInteractable : MonoBehaviour, IInteractable
@@ -6,6 +7,8 @@ public class GunInteractable : MonoBehaviour, IInteractable
     [SerializeField] private GameObject ammoUI;
     [SerializeField] private GameObject interactIcon;
     [SerializeField] private bool canInteract;
+
+
     public GameObject Icon { get => interactIcon; }
 
     public bool CanInteract { get => canInteract; }
@@ -19,6 +22,10 @@ public class GunInteractable : MonoBehaviour, IInteractable
             RemoveIcon();
             playerGun.SetActive(true);
             ammoUI.SetActive(true);
+
+            // run listener events
+            TutorialManager.Instance.NextPhase();
+
             this.gameObject.SetActive(false);
         }
     }
