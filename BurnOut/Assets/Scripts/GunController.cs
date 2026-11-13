@@ -1,5 +1,5 @@
 using System.IO.MemoryMappedFiles;
-using UnityEditor.SearchService;
+//using UnityEditor.SearchService;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -41,10 +41,12 @@ public class GunController : MonoBehaviour
     void Update()
     {
         // end early if dialogue is playing
+        /*
         if (SceneManager.GetActiveScene().name != "Level1Main")
         {
             if (DialogueManager.Instance.DialogueIsPlaying) return;
         }
+        */
         Vector2 mouseScreenPosition = Mouse.current.position.ReadValue();
         Ray ray = mainCamera.ScreenPointToRay(mouseScreenPosition);
         Plane groundPlane = new Plane(Vector3.up, transform.position);
@@ -82,12 +84,12 @@ public class GunController : MonoBehaviour
     private void OnHoseStarted(InputAction.CallbackContext context)
     {
         // end early if dialogue is playing
-
+        /*
         if (SceneManager.GetActiveScene().name != "Level1Main")
         {
-            if (DialogueManager.Instance.DialogueIsPlaying) return;
+           // if (DialogueManager.Instance.DialogueIsPlaying) return;
         }
-
+        */
         if (!hose.isPlaying && ammo > 0 && !FireHydrant.isHydrantPickedUp)
         {
             firing = true;
