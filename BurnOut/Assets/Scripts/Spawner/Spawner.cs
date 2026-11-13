@@ -48,6 +48,8 @@ public class Spawner : Enemy
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     protected override void Start()
     {
+        base.Start();
+
         position = transform.position;      // Assign spawner position on start
 
         enemyPool = new EnemyPool();
@@ -56,6 +58,8 @@ public class Spawner : Enemy
     // Update is called once per frame
     protected override void Update()
     {
+        base.Update();
+
         // Check whether interval has been reached and new enemy of this type should be spawned again
         foreach(SpawnData data in enemySpawnData)
         {
