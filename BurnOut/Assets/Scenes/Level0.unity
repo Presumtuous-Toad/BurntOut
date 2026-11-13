@@ -22866,7 +22866,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb91f49fe1872f84f8403fc946ac4306, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneChangeInteractable
-  sceneIndex: 1
+  sceneIndex: 2
   interactIcon: {fileID: 1624341384}
   canInteract: 1
 --- !u!1001 &666440501
@@ -58205,7 +58205,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!212 &1624341385
 SpriteRenderer:
   serializedVersion: 2
