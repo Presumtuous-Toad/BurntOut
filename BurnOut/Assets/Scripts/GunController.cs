@@ -19,7 +19,7 @@ public class GunController : MonoBehaviour
     [SerializeField] private ReloadBar ReloadBar;
     public Slider ammoSlider;
 
-    private void Start()
+    private void Awake()
     {
         mainCamera = Camera.main;
         attackAction.action.started += OnHoseStarted;
@@ -37,6 +37,9 @@ public class GunController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // end early if dialogue is playing
+        if (DialogueManager.Instance.DialogueIsPlaying) return;
+
         Vector2 mouseScreenPosition = Mouse.current.position.ReadValue();
         Ray ray = mainCamera.ScreenPointToRay(mouseScreenPosition);
         Plane groundPlane = new Plane(Vector3.up, transform.position);
@@ -72,6 +75,8 @@ public class GunController : MonoBehaviour
 
     private void OnHoseStarted(InputAction.CallbackContext context)
     {
+        // end early if dialogue is playing
+        if (DialogueManager.Instance.DialogueIsPlaying) return;
         if (!hose.isPlaying && ammo > 0 && !FireHydrant.isHydrantPickedUp)
         {
             firing = true;

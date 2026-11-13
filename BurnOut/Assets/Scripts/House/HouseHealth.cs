@@ -32,6 +32,6 @@ public class HouseHealth : MonoBehaviour, IDamageable
 
     public void Death()
     {
-        SceneManager.LoadScene(2);
+        SceneManager.LoadScene(3);
     }
 }
