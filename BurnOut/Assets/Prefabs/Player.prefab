@@ -5295,9 +5295,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   normalSpeed: 10
   encumberedSpeed: 5
+  recoilMultiplier: 0.75
   layerMask:
     serializedVersion: 2
     m_Bits: 8
+  velocity: {x: 0, y: 0, z: 0}
 --- !u!114 &1467729388979361502
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -171411,6 +171411,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 789335074507767610, guid: 122339c2e305e7348924edef07526c0f, type: 3}
+      propertyPath: normalSpeed
+      value: 7.5
+      objectReference: {fileID: 0}
     - target: {fileID: 1467729388979361502, guid: 122339c2e305e7348924edef07526c0f, type: 3}
       propertyPath: CurrentHydrant
       value: 
@@ -171423,6 +171427,10 @@ PrefabInstance:
       propertyPath: ammoSlider
       value: 
       objectReference: {fileID: 731298929}
+    - target: {fileID: 4058440852035816272, guid: 122339c2e305e7348924edef07526c0f, type: 3}
+      propertyPath: m_Constraints
+      value: 112
+      objectReference: {fileID: 0}
     - target: {fileID: 7173622043332317989, guid: 122339c2e305e7348924edef07526c0f, type: 3}
       propertyPath: m_Name
       value: Player

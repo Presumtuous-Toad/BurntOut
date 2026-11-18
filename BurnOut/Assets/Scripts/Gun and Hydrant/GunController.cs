@@ -17,7 +17,7 @@ public class GunController : MonoBehaviour
     [field: SerializeField]public int ammo { get; private set; }
     //private bool reloading;
 
-    private bool firing;
+    public bool firing { get; private set; }
     [SerializeField] private float reloadSpeed; //how long it takes to reload
     [SerializeField] private ReloadBar ReloadBar;
     public Slider ammoSlider;

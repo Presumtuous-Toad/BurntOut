@@ -6,15 +6,17 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] private float normalSpeed;
     [SerializeField] private float encumberedSpeed;
+    [SerializeField] private float recoilMultiplier;
     private float speed;
     [SerializeField] private LayerMask layerMask;
 
     private Camera cam;
     private Rigidbody rb;
     private Animator animator;
+    private GunController gun;
 
     private Vector3 direction;
-    private Vector3 velocity;
+    public Vector3 velocity;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -22,6 +24,7 @@ public class PlayerController : MonoBehaviour
         cam = FindAnyObjectByType<Camera>();
         rb = gameObject.GetComponent<Rigidbody>();
         animator = GetComponentInChildren<Animator>();
+        gun = GetComponentInChildren<GunController>();
     }
 
     void FixedUpdate()
@@ -43,6 +46,9 @@ public class PlayerController : MonoBehaviour
             speed = normalSpeed;
         }
 
+        //if firing, apply force in direction opposite where firing
+        
+
         // move rigidbody 
         float deltaTime = Time.fixedDeltaTime;
         Vector3 position = gameObject.transform.position;
@@ -62,14 +68,18 @@ public class PlayerController : MonoBehaviour
                 transform.LookAt(lookAt);
             }
         }
-
-        if(direction == Vector3.zero)
+        
+        if (direction == Vector3.zero && !gun.firing)
         {
             return;
         }
 
 
         velocity = direction.normalized * speed;
+        if (gun.firing)
+        {
+            velocity += (-transform.forward * recoilMultiplier);
+        }
         position += velocity * deltaTime;
         rb.MovePosition(position);
 
